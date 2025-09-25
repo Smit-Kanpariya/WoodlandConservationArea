@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trees, Droplets, MapPin, Camera, Leaf, Users } from 'lucide-react';
 import AudioButton from '@/components/AudioButton';
+import TypingText from '@/components/TypingText';
 import heroImage from '@/assets/hero-woodland.jpg';
 import yellowBirchImage from '@/assets/yellow-birch.jpg';
 import wetlandImage from '@/assets/wetland.jpg';
@@ -53,7 +54,14 @@ const Home = () => {
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center mb-6">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 no-break">
-              Experience
+              Experience{' '}
+              <TypingText 
+                words={['Peace', 'Excitement', 'Nature', 'Community']}
+                className="text-accent"
+                typingSpeed={120}
+                deletingSpeed={80}
+                pauseDuration={1500}
+              />
             </h1>
             <AudioButton 
               text="Experience Conservation. Preserve and explore the unique woodland ecosystem of St. Margaret's Bay"
@@ -61,9 +69,6 @@ const Home = () => {
               variant="ghost"
             />
           </div>
-          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-8 no-break">
-            Conservation
-          </h2>
           <p className="text-xl sm:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
             Preserve and explore the unique woodland ecosystem of St. Margaret's Bay
           </p>
