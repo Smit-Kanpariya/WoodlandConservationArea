@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Trees, Droplets, MapPin, Camera, Leaf, Users } from 'lucide-react';
 import AudioButton from '@/components/AudioButton';
 import TypingText from '@/components/TypingText';
+import ImageCarousel from '@/components/ImageCarousel';
 import heroImage from '@/assets/hero-woodland.jpg';
 import yellowBirchImage from '@/assets/yellow-birch.jpg';
 import wetlandImage from '@/assets/wetland.jpg';
@@ -126,8 +127,30 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Areas Section */}
+      {/* Community Photos Section */}
       <section className="py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 flex items-center justify-center">
+              Community Gallery
+              <AudioButton 
+                text="Community Gallery. Photos shared by our community members showcasing the beauty of our conservation areas."
+                className="ml-4"
+              />
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Photos shared by our community members showcasing the beauty of our conservation areas
+            </p>
+          </div>
+
+          <div className="mb-12">
+            <ImageCarousel />
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Areas Section */}
+      <section className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 flex items-center justify-center">

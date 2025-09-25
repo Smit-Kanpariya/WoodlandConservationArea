@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Heart, Star, Package, Truck, Shield } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Package, Truck, Shield, X } from 'lucide-react';
 import AudioButton from '@/components/AudioButton';
+import AuthModal from '@/components/AuthModal';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 const Shop = () => {
   const [cart, setCart] = useState<number[]>([]);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   const products = [
     {
@@ -85,11 +92,97 @@ const Shop = () => {
 
   const addToCart = (productId: number) => {
     setCart([...cart, productId]);
+    toast({
+      title: "Added to Cart",
+      description: "Item has been added to your cart.",
+    });
+  };
+
+  const removeFromCart = (productId: number) => {
+    setCart(cart.filter(id => id !== productId));
+  };
+
+  const handleCheckout = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    
+    // Proceed with checkout logic
+    toast({
+      title: "Checkout",
+      description: "Proceeding to secure checkout...",
+    });
+  };
+
+  const getTotalPrice = () => {
+    return cart.reduce((total, productId) => {
+      const product = products.find(p => p.id === productId);
+      return total + (product?.price || 0);
+    }, 0).toFixed(2);
+  };
+
+  const getCartItems = () => {
+    return cart.map(productId => {
+      const product = products.find(p => p.id === productId);
+      const quantity = cart.filter(id => id === productId).length;
+      return { product, quantity };
+    }).filter((item, index, array) => 
+      array.findIndex(arrItem => arrItem.product?.id === item.product?.id) === index
+    );
   };
 
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Cart Summary Bar */}
+        {cart.length > 0 && (
+          <div className="fixed top-20 right-4 z-50 bg-white dark:bg-gray-800 border shadow-lg rounded-lg p-4 max-w-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-foreground">Shopping Cart</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCart(!showCart)}
+              >
+                {showCart ? <X className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
+              </Button>
+            </div>
+            
+            {showCart && (
+              <div className="space-y-3">
+                {getCartItems().map(({ product, quantity }) => (
+                  product && (
+                    <div key={product.id} className="flex items-center justify-between text-sm">
+                      <span className="flex-1 text-foreground">{product.name}</span>
+                      <span className="text-muted-foreground mx-2">×{quantity}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFromCart(product.id)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )
+                ))}
+                <div className="border-t pt-3">
+                  <div className="flex justify-between font-semibold text-foreground">
+                    <span>Total: ${getTotalPrice()}</span>
+                  </div>
+                  <Button 
+                    onClick={handleCheckout}
+                    className="w-full mt-3 bg-accent hover:bg-accent/90 text-accent-foreground"
+                  >
+                    Checkout
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 flex items-center justify-center">
@@ -243,31 +336,6 @@ const Shop = () => {
           </div>
         </section>
 
-        {/* Shopping Cart Summary */}
-        {cart.length > 0 && (
-          <section className="mb-16">
-            <Card className="bg-accent/10 border-accent">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <ShoppingCart className="w-6 h-6 text-accent mr-3" />
-                    <span className="text-lg font-semibold text-foreground">
-                      {cart.length} item{cart.length !== 1 ? 's' : ''} in cart
-                    </span>
-                  </div>
-                  <div className="flex space-x-3">
-                    <Button variant="outline">
-                      View Cart
-                    </Button>
-                    <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                      Checkout
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        )}
 
         {/* Support Message */}
         <section>
@@ -301,6 +369,12 @@ const Shop = () => {
             </div>
           </div>
         </section>
+
+        {/* Auth Modal */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+        />
       </div>
     </div>
   );

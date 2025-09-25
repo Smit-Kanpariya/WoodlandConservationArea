@@ -1,33 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Upload, Camera, Download, Heart } from 'lucide-react';
 import AudioButton from '@/components/AudioButton';
+import PhotoUpload from '@/components/PhotoUpload';
+import { supabase } from '@/integrations/supabase/client';
+import { useLikes } from '@/hooks/useLikes';
+
+interface Photo {
+  id: string;
+  image_url: string;
+  caption: string | null;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
+const PhotoCard = ({ photo }: { photo: Photo }) => {
+  const { likes, isLiked, loading, toggleLike } = useLikes(photo.id);
+
+  return (
+    <Card className="event-card overflow-hidden hover:shadow-lg transition-shadow duration-300">
+      <div className="relative group">
+        <img
+          src={photo.image_url}
+          alt={photo.caption || 'Photo'}
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        <div className="absolute top-2 right-2">
+          <AudioButton 
+            text={`Photo: ${photo.caption || 'Untitled'}. ${likes} likes.`}
+            className="bg-black/20 hover:bg-black/40"
+            variant="ghost"
+            size="sm"
+          />
+        </div>
+        {photo.caption && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+            <h3 className="text-white font-medium text-sm no-break">
+              {photo.caption}
+            </h3>
+          </div>
+        )}
+      </div>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`transition-colors duration-200 ${
+              isLiked 
+                ? 'text-red-500 hover:text-red-600' 
+                : 'text-muted-foreground hover:text-red-500'
+            }`}
+            onClick={toggleLike}
+            disabled={loading}
+          >
+            <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+            {likes}
+          </Button>
+          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+            <Download className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 const Gallery = () => {
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const categories = [
-    { id: 'all', name: 'All Photos', count: 24 },
-    { id: 'birch', name: 'Yellow Birch', count: 8 },
-    { id: 'wetland', name: 'Wetlands', count: 6 },
-    { id: 'wildlife', name: 'Wildlife', count: 7 },
-    { id: 'historical', name: 'Historical', count: 3 }
-  ];
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
 
-  // Sample gallery items (in a real app, these would come from a database)
-  const galleryItems = [
-    { id: 1, title: 'Ancient Yellow Birch', category: 'birch', likes: 12, photographer: 'Nature Lover' },
-    { id: 2, title: 'Morning Wetland Mist', category: 'wetland', likes: 8, photographer: 'Conservation Team' },
-    { id: 3, title: 'Farmhouse Foundation', category: 'historical', likes: 15, photographer: 'Heritage Society' },
-    { id: 4, title: 'Red Squirrel', category: 'wildlife', likes: 20, photographer: 'Wildlife Observer' },
-    { id: 5, title: 'Birch Bark Detail', category: 'birch', likes: 6, photographer: 'Macro Enthusiast' },
-    { id: 6, title: 'Wetland Reflection', category: 'wetland', likes: 11, photographer: 'Local Photographer' }
-  ];
+  const fetchPhotos = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('photos')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const filteredItems = selectedCategory === 'all' 
-    ? galleryItems 
-    : galleryItems.filter(item => item.category === selectedCategory);
+      if (error) throw error;
+      setPhotos(data || []);
+    } catch (error) {
+      console.error('Error fetching photos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="py-12">
@@ -47,26 +109,14 @@ const Gallery = () => {
           </p>
           
           {/* Upload Button */}
-          <Button size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-            <Upload className="w-5 h-5 mr-2" />
-            Upload Your Photos
-          </Button>
+          <PhotoUpload onUploadSuccess={fetchPhotos} />
         </div>
 
-        {/* Category Filter */}
-        <section className="mb-12">
-          <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                variant={selectedCategory === category.id ? 'default' : 'outline'}
-                className="no-break"
-              >
-                {category.name} ({category.count})
-              </Button>
-            ))}
-          </div>
+        {/* Photo Count */}
+        <section className="mb-12 text-center">
+          <p className="text-muted-foreground">
+            {loading ? 'Loading photos...' : `${photos.length} photos in gallery`}
+          </p>
         </section>
 
         {/* Upload Guidelines */}
@@ -113,45 +163,31 @@ const Gallery = () => {
 
         {/* Gallery Grid */}
         <section>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredItems.map((item) => (
-              <Card key={item.id} className="event-card overflow-hidden">
-                <div className="relative">
-                  {/* Placeholder for actual image */}
-                  <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <Camera className="w-12 h-12 text-muted-foreground" />
-                  </div>
-                  <div className="absolute top-2 right-2">
-                    <AudioButton 
-                      text={`Photo titled ${item.title} by ${item.photographer}. ${item.likes} likes.`}
-                      className="bg-black/20 hover:bg-black/40"
-                      variant="ghost"
-                      size="sm"
-                    />
-                  </div>
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                    <h3 className="text-white font-medium text-sm mb-1 no-break">
-                      {item.title}
-                    </h3>
-                    <p className="text-white/80 text-xs no-break">
-                      by {item.photographer}
-                    </p>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent">
-                      <Heart className="w-4 h-4 mr-1" />
-                      {item.likes}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                      <Download className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <Card key={i} className="event-card overflow-hidden">
+                  <div className="w-full h-48 bg-muted animate-pulse" />
+                  <CardContent className="p-4">
+                    <div className="h-4 bg-muted rounded animate-pulse" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : photos.length === 0 ? (
+            <div className="text-center py-12">
+              <Camera className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">No photos yet</h3>
+              <p className="text-muted-foreground mb-6">Be the first to share a photo of this beautiful conservation area!</p>
+              <PhotoUpload onUploadSuccess={fetchPhotos} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {photos.map((photo) => (
+                <PhotoCard key={photo.id} photo={photo} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Call to Action */}
@@ -169,14 +205,7 @@ const Gallery = () => {
               Your photos help us track changes in the ecosystem, document wildlife sightings, 
               and share the beauty of this special place with others.
             </p>
-            <Button 
-              size="lg" 
-              variant="secondary"
-              className="px-8 py-3"
-            >
-              <Upload className="w-5 h-5 mr-2" />
-              Start Contributing
-            </Button>
+            <PhotoUpload onUploadSuccess={fetchPhotos} />
           </div>
         </section>
       </div>
