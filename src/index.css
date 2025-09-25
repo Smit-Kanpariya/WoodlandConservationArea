@@ -2,41 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Woodland Conservation Design System - Inspired by nature and accessibility */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core woodland theme colors */
+    --background: 45 12% 97%;
+    --foreground: 90 12% 8%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 45 20% 95%;
+    --card-foreground: 90 15% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 45 20% 95%;
+    --popover-foreground: 90 15% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Forest green primary with earth tones */
+    --primary: 120 35% 25%;
+    --primary-foreground: 45 25% 95%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Warm earth secondary */
+    --secondary: 30 25% 85%;
+    --secondary-foreground: 90 15% 12%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted forest tones */
+    --muted: 45 15% 88%;
+    --muted-foreground: 90 8% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Natural accent - warm orange like autumn leaves */
+    --accent: 25 75% 65%;
+    --accent-foreground: 45 25% 95%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Gentle warning colors (avoiding red/green as specified) */
+    --destructive: 15 85% 55%;
+    --destructive-foreground: 45 25% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 45 20% 85%;
+    --input: 45 20% 92%;
+    --ring: 120 35% 25%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Accessibility enhancements */
+    --large-text: 1.125rem;
+    --extra-large-text: 1.5rem;
+    
+    /* Custom cursor colors */
+    --cursor-light: 25 75% 65%;
+    --cursor-dark: 60 100% 70%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -56,33 +68,38 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode with warm, accessible colors */
+    --background: 90 15% 8%;
+    --foreground: 60 100% 85%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 90 12% 12%;
+    --card-foreground: 60 100% 85%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 90 12% 12%;
+    --popover-foreground: 60 100% 85%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    /* Lighter forest green for dark mode */
+    --primary: 120 40% 45%;
+    --primary-foreground: 90 15% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    /* Dark earth secondary */
+    --secondary: 30 15% 20%;
+    --secondary-foreground: 60 100% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    /* Dark muted tones */
+    --muted: 90 8% 18%;
+    --muted-foreground: 60 50% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Warm accent for dark mode */
+    --accent: 25 80% 60%;
+    --accent-foreground: 90 15% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 15 75% 50%;
+    --destructive-foreground: 60 100% 85%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 90 8% 22%;
+    --input: 90 8% 18%;
+    --ring: 120 40% 45%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -97,9 +114,48 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="hsl(var(--cursor-light))"><path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35z"/></svg>'), auto;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Calibri', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: var(--large-text);
+    line-height: 1.6;
+  }
+
+  /* Accessibility enhancements */
+  .text-speech-button {
+    @apply bg-accent text-accent-foreground hover:bg-accent/90 px-4 py-2 rounded-md font-medium transition-colors;
+  }
+
+  .audio-description-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 p-2 rounded-full transition-colors;
+  }
+
+  /* Prevent word breaking as specified */
+  .no-break {
+    word-break: keep-all;
+    hyphens: none;
+  }
+
+  /* Large contrasting cursor for dark mode */
+  .dark * {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="hsl(var(--cursor-dark))"><path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35z"/></svg>'), auto;
+  }
+
+  /* Hero section styling */
+  .hero-overlay {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(var(--accent) / 0.6));
+  }
+
+  /* Statistics section */
+  .stats-card {
+    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-6 text-center hover:bg-card/90 transition-all;
+  }
+
+  /* Event cards */
+  .event-card {
+    @apply bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
   }
 }

@@ -1,0 +1,21 @@
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Navigation from './Navigation';
+import Footer from './Footer';
+import { ThemeProvider } from 'next-themes';
+
+const Layout = () => {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="light">
+      <div className="min-h-screen flex flex-col">
+        <Navigation />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
+    </ThemeProvider>
+  );
+};
+
+export default Layout;

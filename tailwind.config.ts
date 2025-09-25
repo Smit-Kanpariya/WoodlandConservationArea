@@ -13,6 +13,14 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'calibri': ['Calibri', 'system-ui', 'sans-serif'],
+        'sans': ['Calibri', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'accessibility-base': 'var(--large-text)',
+        'accessibility-large': 'var(--extra-large-text)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
