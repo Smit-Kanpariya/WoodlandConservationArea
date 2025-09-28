@@ -73,7 +73,7 @@ const Footer = () => {
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
           <p className="text-sm flex items-center justify-center">
             <span className="no-break">
-              © {currentYear} Woodland Conservation Initiative. Made with
+              © {currentYear} smit kanpariya. Made with
             </span>
             <Heart className="w-4 h-4 mx-1 text-accent" />
             <span className="no-break">for nature preservation.</span>

@@ -1,5 +1,7 @@
 # Welcome to your Lovable project
 
+> Author: smit kanpariya
+
 ## Project info
 
 **URL**: https://lovable.dev/projects/75b4eec0-4921-4e58-8e57-b84cc3e365f1
