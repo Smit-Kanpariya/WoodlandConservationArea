@@ -1,73 +1,70 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Menu, X, Volume2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { useTheme } from 'next-themes';
+import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
+import { Menu, X, Volume2 } from "lucide-react";
+import { Button } from "./ui/button";
+import { useTheme } from "next-themes";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   const playTextToSpeech = (text: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+    if ("speechSynthesis" in window) {
+      // Toggle behavior: if already speaking, stop; otherwise start
+      const synth = window.speechSynthesis;
+      if (synth.speaking) {
+        synth.cancel();
+        return;
+      }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.8;
       utterance.pitch = 1;
       utterance.volume = 0.8;
-      window.speechSynthesis.speak(utterance);
+      synth.speak(utterance);
     }
   };
 
   const navItems = [
-    { name: 'About', path: '/about' },
-    { name: 'Eco-System', path: '/ecosystem' },
-    { name: 'Gallery', path: '/gallery' },
-    { name: 'Flora/Fauna/Fungi', path: '/species' },
-    { name: 'Natural Burial', path: '/burial' },
-    { name: 'eCommerce', path: '/shop' },
-    { name: 'Site Map', path: '/map' },
-    { name: 'Contact', path: '/contact' }
+    { name: "About", path: "/about" },
+    { name: "Eco-System", path: "/ecosystem" },
+    { name: "Gallery", path: "/gallery" },
+    { name: "Flora/Fauna/Fungi", path: "/species" },
+    { name: "Natural Burial", path: "/burial" },
+    { name: "eCommerce", path: "/shop" },
+    { name: "Site Map", path: "/map" },
+    { name: "Contact", path: "/contact" },
   ];
 
   return (
     <nav className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16">
           {/* Logo and Title */}
           <div className="flex items-center space-x-4">
             <NavLink to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">WC</span>
-              </div>
-              <span className="text-foreground font-semibold text-lg no-break">
-                Woodland Conservation
-              </span>
+              <img
+                src="/logo.png"
+                alt="Site logo"
+                className="h-16 w-auto"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+              />
             </NavLink>
-
-            {/* Text to Speech Button */}
-            <Button
-              onClick={() => playTextToSpeech("Woodland Conservation - St. Margaret's Bay")}
-              className="text-speech-button"
-              size="sm"
-            >
-              <Volume2 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Text to Speech</span>
-            </Button>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="ml-6 flex items-center space-x-4 flex-nowrap overflow-x-auto">
               {navItems.map((item) => (
                 <NavLink
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `px-3 py-2 rounded-md text-sm font-medium no-break transition-colors ${
+                    `px-3 rounded-md text-sm font-medium whitespace-nowrap break-keep inline-flex items-center h-10 transition-colors ${
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-accent hover:text-accent-foreground"
                     }`
                   }
                 >
@@ -78,14 +75,26 @@ const Navigation = () => {
           </div>
 
           {/* Theme Toggle and Mobile Menu Button */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 ml-auto">
             <Button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={() =>
+                playTextToSpeech("Woodland Conservation - St. Margaret's Bay")
+              }
+              variant="ghost"
+              size="icon"
+              className="p-0"
+              aria-label="Text to Speech"
+              title="Text to Speech"
+            >
+              <Volume2 className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               variant="outline"
               size="sm"
-              className="no-break"
+              className="whitespace-nowrap break-keep"
             >
-              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+              {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
             </Button>
 
             <div className="lg:hidden">
@@ -94,7 +103,11 @@ const Navigation = () => {
                 variant="outline"
                 size="sm"
               >
-                {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                {isOpen ? (
+                  <X className="w-4 h-4" />
+                ) : (
+                  <Menu className="w-4 h-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -109,10 +122,10 @@ const Navigation = () => {
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `block px-3 py-2 rounded-md text-base font-medium no-break transition-colors ${
+                    `block px-3 py-2 rounded-md text-base font-medium whitespace-nowrap break-keep transition-colors ${
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+                        ? "bg-primary text-primary-foreground"
+                        : "text-foreground hover:bg-accent hover:text-accent-foreground"
                     }`
                   }
                   onClick={() => setIsOpen(false)}
@@ -120,6 +133,22 @@ const Navigation = () => {
                   {item.name}
                 </NavLink>
               ))}
+              <div className="px-3">
+                <Button
+                  onClick={() =>
+                    playTextToSpeech(
+                      "Woodland Conservation - St. Margaret's Bay"
+                    )
+                  }
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Text to Speech"
+                  title="Text to Speech"
+                  className="w-10 h-10"
+                >
+                  <Volume2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
         )}

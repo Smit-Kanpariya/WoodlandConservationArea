@@ -1,28 +1,32 @@
-import React from 'react';
-import { Volume2 } from 'lucide-react';
-import { Button } from './ui/button';
+import React from "react";
+import { Volume2 } from "lucide-react";
+import { Button } from "./ui/button";
 
 interface AudioButtonProps {
   text: string;
   className?: string;
-  variant?: 'default' | 'outline' | 'ghost';
-  size?: 'sm' | 'default' | 'lg';
+  variant?: "default" | "outline" | "ghost";
+  size?: "sm" | "default" | "lg";
 }
 
-const AudioButton: React.FC<AudioButtonProps> = ({ 
-  text, 
-  className = '', 
-  variant = 'default',
-  size = 'sm'
+const AudioButton: React.FC<AudioButtonProps> = ({
+  text,
+  className = "",
+  variant = "default",
+  size = "sm",
 }) => {
   const playAudio = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+    if ("speechSynthesis" in window) {
+      const synth = window.speechSynthesis;
+      if (synth.speaking) {
+        synth.cancel();
+        return;
+      }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 0.8;
       utterance.pitch = 1;
       utterance.volume = 0.8;
-      window.speechSynthesis.speak(utterance);
+      synth.speak(utterance);
     }
   };
 
