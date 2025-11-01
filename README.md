@@ -45,10 +45,4 @@ Woodland Conservation Foundation is dedicated to preserving and protecting natur
 - Tailwind CSS
 - Supabase
 
-## Deployment
 
-This project can be deployed to any static hosting service like Vercel, Netlify, or GitHub Pages.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
