@@ -24,15 +24,24 @@ const ImageCarousel = () => {
   }, []);
 
   useEffect(() => {
+    // Clear any existing interval first
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = undefined;
+    }
+
+    // Set up auto-scroll if enabled and photos are available
     if (isAutoScrolling && photos.length > 0) {
       intervalRef.current = setInterval(() => {
         setCurrentIndex((prev) => (prev + 1) % photos.length);
       }, 4000);
     }
 
+    // Cleanup function
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = undefined;
       }
     };
   }, [isAutoScrolling, photos.length]);
@@ -78,11 +87,26 @@ const ImageCarousel = () => {
     );
   }
 
+  // Calculate the transform offset based on currentIndex
+  // Each photo container is 272px wide (256px photo + 16px margin)
+  const photoWidth = 256; // w-64 = 16rem = 256px
+  const photoMargin = 16; // mx-2 = 0.5rem on each side = 8px each = 16px total
+  const photoTotalWidth = photoWidth + photoMargin;
+  // Calculate offset: move by one photo width at a time
+  // Clamp to prevent scrolling beyond the last visible photo
+  const containerPadding = 16; // px-4 = 1rem = 16px
+  const maxScrollOffset = Math.max(0, (photos.length - 1) * photoTotalWidth);
+  const calculatedOffset = currentIndex * photoTotalWidth;
+  const transformOffset = Math.min(calculatedOffset, maxScrollOffset);
+
   return (
     <div className="relative w-full bg-muted/20 pb-12 overflow-hidden group">
       <div 
-        className="flex transition-transform duration-1000 ease-linear h-64 items-center px-4"
-        style={{ width: `${photos.length * 25}%` }}
+        className="flex transition-transform duration-1000 ease-in-out h-64 items-center px-4"
+        style={{ 
+          width: `${photos.length * photoTotalWidth}px`,
+          transform: `translateX(-${transformOffset}px)`
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         ref={carouselRef}
@@ -127,7 +151,10 @@ const ImageCarousel = () => {
                 ? "w-6 bg-primary"
                 : "w-2 bg-muted-foreground/30"
             }`}
-            onClick={() => setCurrentIndex(index)}
+            onClick={() => {
+              setCurrentIndex(index);
+              setIsAutoScrolling(true);
+            }}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

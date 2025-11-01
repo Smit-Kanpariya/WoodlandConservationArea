@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -23,8 +23,49 @@ import {
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import AudioButton from "@/components/AudioButton";
+import { useToast } from "@/hooks/use-toast";
 
 const NaturalBurial = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    interest: "",
+    message: "",
+    newsletter: false,
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would submit to a backend service or Supabase
+    toast({
+      title: "Thank you for your inquiry!",
+      description:
+        "We'll respond to your message about natural burial options within 24 hours.",
+    });
+    setFormData({
+      name: "",
+      email: "",
+      interest: "",
+      message: "",
+      newsletter: false,
+    });
+  };
+
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const value =
+      e.target.type === "checkbox"
+        ? (e.target as HTMLInputElement).checked
+        : e.target.value;
+    setFormData({
+      ...formData,
+      [e.target.name]: value,
+    });
+  };
   const markerOptions = [
     {
       name: "Native Stone Marker",
@@ -720,7 +761,7 @@ const NaturalBurial = () => {
                 </p>
               </div>
 
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label
@@ -733,6 +774,8 @@ const NaturalBurial = () => {
                       type="text"
                       id="name"
                       name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       required
                       className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
                       placeholder="Your name"
@@ -750,6 +793,8 @@ const NaturalBurial = () => {
                       type="email"
                       id="email"
                       name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                       className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
                       placeholder="your.email@example.com"
@@ -767,6 +812,8 @@ const NaturalBurial = () => {
                   <select
                     id="interest"
                     name="interest"
+                    value={formData.interest}
+                    onChange={handleInputChange}
                     className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
                   >
                     <option value="">Select an option</option>
@@ -790,6 +837,8 @@ const NaturalBurial = () => {
                   <textarea
                     id="message"
                     name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     rows={4}
                     required
                     className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
@@ -803,6 +852,8 @@ const NaturalBurial = () => {
                       id="newsletter"
                       name="newsletter"
                       type="checkbox"
+                      checked={formData.newsletter}
+                      onChange={handleInputChange}
                       className="h-4 w-4 rounded border-input text-primary focus:ring-primary/50"
                     />
                   </div>

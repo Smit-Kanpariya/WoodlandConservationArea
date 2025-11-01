@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Mail, Clock, Send, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import AudioButton from "@/components/AudioButton";
+import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -63,8 +65,11 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to a backend service
-    alert("Thank you for your message! We'll respond within 24 hours.");
+    // In a real app, this would submit to a backend service or Supabase
+    toast({
+      title: "Thank you for your message!",
+      description: "We'll respond to your inquiry within 24 hours.",
+    });
     setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
   };
 
