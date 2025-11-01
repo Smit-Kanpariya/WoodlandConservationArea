@@ -23,6 +23,15 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent, isSignUp: boolean) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -31,9 +40,20 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         : await signIn(email, password);
 
       if (error) {
+        // Specific error handling
+        let errorMessage = error.message;
+        
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = "Invalid email or password. Please try again.";
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = "Please verify your email before signing in. Check your inbox for a verification link.";
+        } else if (error.message.includes('User already registered')) {
+          errorMessage = "This email is already registered. Please sign in instead.";
+        }
+        
         toast({
           title: "Authentication Error",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
@@ -43,13 +63,18 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
             ? "Please check your email to verify your account."
             : "You have been successfully signed in.",
         });
+        
+        // Reset form and close modal on success
+        setEmail('');
+        setPassword('');
         onSuccess?.();
         onClose();
       }
     } catch (error) {
+      console.error('Auth error:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred.",
+        description: "An unexpected error occurred. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -61,15 +86,23 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setEmail('');
     setPassword('');
     setIsLoading(false);
+    // Clear any potential errors from auth context
+    const { error: authError, refreshSession } = useAuth();
+    if (authError) {
+      refreshSession().catch(console.error);
+    }
+  };
+
+  // Handle dialog state changes
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      onClose();
+      resetForm();
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        onClose();
-        resetForm();
-      }
-    }}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Welcome</DialogTitle>
@@ -108,9 +141,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   required
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading || !email || !password}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
+                {isLoading ? 'Processing...' : 'Sign In'}
               </Button>
             </form>
           </TabsContent>
@@ -140,9 +177,13 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   minLength={6}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading || !email || !password}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Account
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
           </TabsContent>

@@ -45,7 +45,7 @@
     /* Accessibility enhancements */
     --large-text: 1.125rem;
     --extra-large-text: 1.5rem;
-    
+
     /* Custom cursor colors */
     --cursor-light: 25 75% 65%;
     --cursor-dark: 60 100% 70%;
@@ -111,15 +111,14 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="hsl(var(--cursor-light))"><path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35z"/></svg>'), auto;
-  }
-
-  body {
+body {
     @apply bg-background text-foreground;
-    font-family: 'Calibri', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Calibri",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     font-size: var(--large-text);
     line-height: 1.6;
   }
@@ -139,14 +138,14 @@
     hyphens: none;
   }
 
-  /* Large contrasting cursor for dark mode */
-  .dark * {
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="hsl(var(--cursor-dark))"><path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.86a.5.5 0 0 0-.85.35z"/></svg>'), auto;
-  }
 
   /* Hero section styling */
   .hero-overlay {
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(var(--accent) / 0.6));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.8),
+      hsl(var(--accent) / 0.6)
+    );
   }
 
   /* Statistics section */
@@ -174,7 +173,12 @@
   }
 
   @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+    0%,
+    50% {
+      opacity: 1;
+    }
+    51%,
+    100% {
+      opacity: 0;
+    }
   }
-}

@@ -22,12 +22,38 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleUploadClick = () => {
+  const handleAuthModalClose = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!user) {
       setIsAuthModalOpen(true);
       return;
     }
+    // Reset form when opening the dialog
+    setCaption('');
+    setSelectedFile(null);
     setIsOpen(true);
+  };
+
+  // Handle successful authentication
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+    // Reset form when opening the dialog after successful auth
+    setCaption('');
+    setSelectedFile(null);
+    setIsOpen(true);
+  };
+
+  // Handle dialog open/close
+  const handleOpenChange = (open: boolean) => {
+    if (open && !user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsOpen(open);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,7 +140,7 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogTrigger asChild>
           <Button onClick={handleUploadClick} className="flex items-center gap-2">
             <Upload className="w-4 h-4" />
@@ -181,13 +207,10 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
         </DialogContent>
       </Dialog>
 
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={() => {
-          setIsAuthModalOpen(false);
-          setIsOpen(true);
-        }}
+      <AuthModal 
+        isOpen={isAuthModalOpen} 
+        onClose={handleAuthModalClose}
+        onSuccess={handleAuthSuccess}
       />
     </>
   );

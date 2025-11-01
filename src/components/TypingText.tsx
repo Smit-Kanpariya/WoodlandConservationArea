@@ -18,7 +18,6 @@ const TypingText: React.FC<TypingTextProps> = ({
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const [showCursor, setShowCursor] = useState(true);
 
   useEffect(() => {
     const currentWord = words[currentWordIndex];
@@ -43,26 +42,7 @@ const TypingText: React.FC<TypingTextProps> = ({
     return () => clearTimeout(timeout);
   }, [currentText, isTyping, currentWordIndex, words, typingSpeed, deletingSpeed, pauseDuration]);
 
-  // Cursor blinking effect
-  useEffect(() => {
-    const cursorInterval = setInterval(() => {
-      setShowCursor(prev => !prev);
-    }, 530);
-
-    return () => clearInterval(cursorInterval);
-  }, []);
-
-  return (
-    <span className={className}>
-      {currentText}
-      <span 
-        className={`inline-block w-0.5 h-[0.9em] bg-current ml-1 ${
-          showCursor ? 'opacity-100' : 'opacity-0'
-        } transition-opacity duration-100`}
-        aria-hidden="true"
-      />
-    </span>
-  );
+  return <span className={className}>{currentText}</span>;
 };
 
 export default TypingText;

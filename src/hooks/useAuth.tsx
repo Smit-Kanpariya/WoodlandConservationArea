@@ -1,14 +1,19 @@
-import { useState, useEffect, createContext, useContext } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+
+// Token refresh interval (55 minutes to be safe, as tokens expire in 1 hour)
+const TOKEN_REFRESH_INTERVAL = 55 * 60 * 1000;
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<void>;
+  error: AuthError | null;
+  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signOut: () => Promise<{ error: AuthError | null }>;
+  refreshSession: () => Promise<{ error: AuthError | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,61 +22,174 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<AuthError | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
+  // Handle token refresh
+  const setupTokenRefresh = useCallback((session: Session | null) => {
+    // Clear any existing interval
+    if (refreshInterval) {
+      clearInterval(refreshInterval);
+    }
+
+    // Only set up refresh if we have a valid session
+    if (session?.access_token) {
+      const interval = setInterval(async () => {
+        try {
+          const { data, error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) throw refreshError;
+          setSession(data.session);
+          setUser(data.user);
+        } catch (err) {
+          console.error('Error refreshing session:', err);
+          setError(err as AuthError);
+        }
+      }, TOKEN_REFRESH_INTERVAL);
+
+      setRefreshInterval(interval);
+      return () => clearInterval(interval);
+    }
+  }, [refreshInterval]);
+
+  // Handle auth state changes
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Set up token refresh when session changes
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setupTokenRefresh(session);
+        } else if (event === 'SIGNED_OUT') {
+          if (refreshInterval) {
+            clearInterval(refreshInterval);
+            setRefreshInterval(null);
+          }
+        }
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession) {
+          setupTokenRefresh(currentSession);
+        }
+      } catch (err) {
+        setError(err as AuthError);
+        console.error('Error initializing auth:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => subscription.unsubscribe();
-  }, []);
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, [setupTokenRefresh]);
 
   const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
-    });
-    return { error };
+    try {
+      setError(null);
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            signup_date: new Date().toISOString(),
+          },
+        },
+      });
+
+      if (error) throw error;
+      return { error: null };
+    } catch (err) {
+      const authError = err as AuthError;
+      setError(authError);
+      console.error('Sign up error:', authError);
+      return { error: authError };
+    }
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      return { error: null };
+    } catch (err) {
+      const authError = err as AuthError;
+      setError(authError);
+      console.error('Sign in error:', authError);
+      return { error: authError };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      setError(null);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      return { error: null };
+    } catch (err) {
+      const authError = err as AuthError;
+      setError(authError);
+      console.error('Sign out error:', authError);
+      return { error: authError };
+    }
+  };
+
+  const refreshSession = async () => {
+    try {
+      setError(null);
+      const { data, error } = await supabase.auth.refreshSession();
+      
+      if (error) throw error;
+      
+      setSession(data.session);
+      setUser(data.user);
+      return { error: null };
+    } catch (err) {
+      const authError = err as AuthError;
+      setError(authError);
+      console.error('Session refresh error:', authError);
+      return { error: authError };
+    }
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      loading,
-      signUp,
-      signIn,
-      signOut,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        session,
+        loading,
+        error,
+        signUp,
+        signIn,
+        signOut,
+        refreshSession,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
