@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -27,6 +28,17 @@ import { useToast } from "@/hooks/use-toast";
 
 const NaturalBurial = () => {
   const { toast } = useToast();
+  const scrollTargetRef = useRef<HTMLDivElement>(null);
+
+  const scrollToOptions = () => {
+    if (scrollTargetRef.current) {
+      const offset = window.innerHeight * 2.35; // Scroll down by 2 viewport heights
+      window.scrollTo({
+        top: offset,
+        behavior: 'smooth'
+      });
+    }
+  };
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -165,19 +177,33 @@ const NaturalBurial = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               >
-                <Button size="lg" className="gap-2">
+                <Button 
+                  size="lg" 
+                  className="gap-2"
+                  onClick={scrollToOptions}
+                >
                   Explore Options
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="lg" className="gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Visit Our Grounds
+                <Button 
+                  asChild
+                  variant="outline" 
+                  size="lg" 
+                  className="gap-2"
+                >
+                  <Link to="/map" className="flex items-center no-underline">
+                    <MapPin className="w-4 h-4" />
+                    Visit Our Grounds
+                  </Link>
                 </Button>
               </motion.div>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Scroll target for the Explore Options button */}
+      <div ref={scrollTargetRef}></div>
 
       {/* CTA Section */}
       <motion.section

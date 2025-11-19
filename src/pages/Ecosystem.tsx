@@ -129,13 +129,34 @@ const Ecosystem = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               >
-                <Button size="lg" className="gap-2">
+                <Button
+                  size="lg"
+                  className="gap-2"
+                  onClick={() => {
+                    const vh = Math.round(window.visualViewport?.height || window.innerHeight);
+                    const isMobile = window.innerWidth < 768; // 768px is Tailwind's 'md' breakpoint
+                    const step = Math.round(vh * (isMobile ? 0.8 : 0.9));
+                    const current = window.scrollY || window.pageYOffset;
+                    const next = (Math.floor(current / step) + 1) * step;
+                    const maxTop = document.documentElement.scrollHeight - step;
+                    window.scrollTo({ top: Math.min(next, Math.max(0, maxTop)), behavior: "smooth" });
+                  }}
+                >
                   Explore Habitats
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="lg" className="gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Visit Conservation Area
+                <Button variant="outline" size="lg" className="gap-2"
+                  onClick={() => {
+                    const vh = Math.round(window.visualViewport?.height || window.innerHeight);
+                    const isMobile = window.innerWidth < 768;
+                    const step = Math.round(vh * (isMobile ? 3.35 : 2.5));
+                    const current = window.scrollY || window.pageYOffset;
+                    const next = (Math.floor(current / step) + 1) * step;
+                    const maxTop = document.documentElement.scrollHeight - step;
+                    window.scrollTo({ top: Math.min(next, Math.max(0, maxTop)), behavior: "smooth" });
+                  }}
+                >
+                  Key Features
                 </Button>
               </motion.div>
             </div>

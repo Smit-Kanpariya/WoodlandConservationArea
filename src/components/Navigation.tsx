@@ -81,7 +81,7 @@ const Navigation = () => {
     { name: "Gallery", path: "/gallery" },
     { name: "Flora/Fauna/Fungi", path: "/species" },
     { name: "Natural Burial", path: "/burial" },
-    { name: "eCommerce", path: "/shop" },
+    { name: "Shop", path: "/shop" },
     { name: "Site Map", path: "/map" },
     { name: "Contact", path: "/contact" },
   ];
@@ -112,7 +112,7 @@ const Navigation = () => {
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `px-3 rounded-md text-sm font-medium whitespace-nowrap break-keep inline-flex items-center h-10 transition-colors ${
+                    `px-3 rounded-md text-[16px] font-medium whitespace-nowrap break-keep inline-flex items-center h-10 transition-colors ${
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-foreground hover:bg-accent hover:text-accent-foreground"
@@ -188,12 +188,12 @@ const Navigation = () => {
             ) : (
               <Button
                 variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                title="Log In / Sign Up"
+                size="sm"
+                className="whitespace-nowrap break-keep"
+                title="Log in/ Sign up"
                 onClick={() => navigate("/login")}
               >
-                <LogIn className="h-4 w-4" />
+                Log in/Sign in
               </Button>
             )}
 

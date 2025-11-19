@@ -5,12 +5,18 @@ import { supabase } from '@/integrations/supabase/client';
 // Token refresh interval (55 minutes to be safe, as tokens expire in 1 hour)
 const TOKEN_REFRESH_INTERVAL = 55 * 60 * 1000;
 
+interface UserMetadata {
+  firstName?: string;
+  lastName?: string;
+  signup_date?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   error: AuthError | null;
-  signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, userData?: { firstName: string; lastName: string }) => Promise<{ error: AuthError | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   refreshSession: () => Promise<{ error: AuthError | null }>;
@@ -100,7 +106,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [setupTokenRefresh]);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, userData?: { firstName: string; lastName: string }) => {
     try {
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
@@ -111,12 +117,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         options: {
           emailRedirectTo: redirectUrl,
           data: {
+            first_name: userData?.firstName,
+            last_name: userData?.lastName,
             signup_date: new Date().toISOString(),
           },
         },
       });
 
       if (error) throw error;
+      
+      // After successful signup, we'll update the user's profile in a separate table
+      if (userData) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({
+              id: user.id,
+              email: user.email,
+              first_name: userData.firstName,
+              last_name: userData.lastName,
+              updated_at: new Date().toISOString(),
+            });
+
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+            // Don't fail the signup if profile update fails
+          }
+        }
+      }
+      
       return { error: null };
     } catch (err) {
       const authError = err as AuthError;

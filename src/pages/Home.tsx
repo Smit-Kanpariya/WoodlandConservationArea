@@ -80,8 +80,13 @@ const Home = () => {
       >
         <div className="hero-overlay absolute inset-0"></div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center mb-6">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 no-break">
+          <div className="flex flex-col items-center justify-center mb-6">
+            <AudioButton
+              text="Experience Conservation. Preserve and explore the unique woodland ecosystem of St. Margaret's Bay"
+              className="mb-4 bg-white/20 hover:bg-white/30"
+              variant="ghost"
+            />
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 no-break text-center">
               Experience{" "}
               <TypingText
                 words={["Peace", "Excitement", "Nature", "Community"]}
@@ -91,11 +96,6 @@ const Home = () => {
                 pauseDuration={1500}
               />
             </h1>
-            <AudioButton
-              text="Experience Conservation. Preserve and explore the unique woodland ecosystem of St. Margaret's Bay"
-              className="ml-4 bg-white/20 hover:bg-white/30"
-              variant="ghost"
-            />
           </div>
           <p className="text-xl sm:text-2xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed">
             Preserve and explore the unique woodland ecosystem of St. Margaret's
@@ -104,6 +104,13 @@ const Home = () => {
           <Button
             size="lg"
             className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-3 text-lg font-semibold rounded-full"
+            onClick={() => {
+              const vh = Math.round(window.visualViewport?.height || window.innerHeight);
+              const current = window.scrollY || window.pageYOffset;
+              const next = (Math.floor(current / vh) + 1) * vh;
+              const maxTop = document.documentElement.scrollHeight - vh;
+              window.scrollTo({ top: Math.min(next, Math.max(0, maxTop)), behavior: "smooth" });
+            }}
           >
             Explore Conservation Areas
           </Button>
@@ -274,22 +281,25 @@ const Home = () => {
 
           <div className="mt-16 text-center">
             <Button
+              asChild
               variant="outline"
               className="border-primary text-primary hover:bg-primary/5 hover:text-primary/90 px-8 py-6 text-base font-medium rounded-full border-2 transition-all duration-300 hover:shadow-md"
             >
-              View All Conservation Areas
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 ml-2"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <Link to="/ecosystem" className="flex items-center justify-center">
+                View All Conservation Areas
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </Link>
             </Button>
           </div>
         </div>

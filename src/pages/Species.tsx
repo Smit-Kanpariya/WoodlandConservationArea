@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -24,6 +24,7 @@ import {
   Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import AudioButton from "@/components/AudioButton";
 
 interface Species {
@@ -45,14 +46,51 @@ const Species = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Set up scroll ref
-  const speciesListRef = React.useRef<HTMLDivElement>(null);
+  // Set up refs
+  const speciesListRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Simulate loading
+  // Simulate loading and focus search input on mount
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
+    // Focus search input on component mount
+    searchInputRef.current?.focus();
     return () => clearTimeout(timer);
   }, []);
+
+  // Handle search form submission
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    scrollToSpeciesList();
+  };
+
+  // Handle Enter key press in search input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      scrollToSpeciesList();
+    }
+  };
+
+  // Smooth scroll to species list
+  const scrollToSpeciesList = () => {
+    if (window.innerWidth < 768) { // Mobile
+      const vh = Math.round(window.visualViewport?.height || window.innerHeight);
+      const current = window.scrollY || window.pageYOffset;
+      const target = current + (vh * 1.35); // Scroll down by 1.5 viewport heights
+      window.scrollTo({
+        top: Math.min(target, document.documentElement.scrollHeight - vh),
+        behavior: 'smooth'
+      });
+    } else { // Desktop - original behavior
+      if (speciesListRef.current) {
+        window.scrollTo({
+          top: speciesListRef.current.offsetTop - 20, // Adjust offset as needed
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   const categories = [
     { id: "all", name: "All Species", icon: Search, count: 45 },
@@ -157,26 +195,27 @@ const Species = () => {
   const filteredSpecies = species.filter((specimen) => {
     const matchesCategory =
       selectedCategory === "all" || specimen.category === selectedCategory;
-    const matchesSearch =
-      searchQuery === "" ||
-      specimen.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      specimen.scientificName
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      specimen.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    
+    if (searchQuery === "") {
+      return matchesCategory;
+    }
+    
+    const searchLower = searchQuery.toLowerCase().trim();
+    const nameWords = specimen.name.toLowerCase().split(/\s+/);
+    const scientificNameWords = specimen.scientificName.toLowerCase().split(/\s+/);
+    
+    // Check if any word in the name or scientific name starts with the search query
+    const matchesName = nameWords.some(word => word.startsWith(searchLower));
+    const matchesScientificName = scientificNameWords.some(word => word.startsWith(searchLower));
+    
+    return (
+      matchesCategory && 
+      (matchesName || matchesScientificName ||
+       specimen.name.toLowerCase().includes(searchLower) ||
+       specimen.scientificName.toLowerCase().includes(searchLower))
+    );
   });
 
-  // Function to handle search submission
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (speciesListRef.current) {
-      window.scrollTo({
-        top: speciesListRef.current.offsetTop - 100, // 100px offset from the top
-        behavior: 'smooth'
-      });
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -266,18 +305,21 @@ const Species = () => {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
+                      ref={searchInputRef}
                       type="search"
                       placeholder="Search for a species..."
                       className="pl-10 h-12 text-base"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
                       aria-label="Search species"
                     />
                   </div>
                   <Button 
                     type="submit" 
                     size="lg" 
-                    className="whitespace-nowrap"
+                    className="whitespace-nowrap transition-all duration-300 hover:shadow-lg hover:shadow-primary/20"
+                    onClick={scrollToSpeciesList}
                   >
                     <Search className="w-4 h-4 mr-2" />
                     Search
@@ -386,7 +428,25 @@ const Species = () => {
 
         {/* Species Grid */}
         <section className="mb-16">
-          {isLoading ? (
+          {searchQuery && filteredSpecies.length === 0 ? (
+            <div className="text-center py-12">
+              <Search className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+              <h3 className="text-xl font-medium text-foreground mb-2">No results found</h3>
+              <p className="text-muted-foreground">
+                We couldn't find any species matching "{searchQuery}".
+              </p>
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => {
+                  setSearchQuery('');
+                  searchInputRef.current?.focus();
+                }}
+              >
+                Clear search
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[...Array(6)].map((_, i) => (
                 <Card key={i} className="overflow-hidden">
@@ -529,24 +589,17 @@ const Species = () => {
                 biodiversity of our conservation area. Join our community of
                 nature enthusiasts and contribute to important research.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex justify-center">
                 <Button
                   asChild
                   size="lg"
                   variant="secondary"
-                  className="gap-2 group"
+                  className="gap-2 group mx-auto"
                 >
-                  <a href="mailto:info@woodlandconservation.ca?subject=Species%20Sighting%20Report">
+                  <Link to="/contact" className="flex items-center no-underline">
                     <Mail className="h-5 w-5 group-hover:animate-bounce" />
                     Report a Sighting
-                  </a>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="bg-transparent hover:bg-white/10 border-white/20 text-white hover:text-white"
-                >
-                  Learn About Our Research
+                  </Link>
                 </Button>
               </div>
             </div>

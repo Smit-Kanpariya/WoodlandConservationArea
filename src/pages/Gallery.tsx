@@ -346,8 +346,8 @@ const Gallery = () => {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [showGuidelines, setShowGuidelines] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(8);
-  const PHOTOS_PER_PAGE = 8;
+  const [visibleCount, setVisibleCount] = useState(0);
+  const PHOTOS_PER_PAGE = 0; // Will be set in useEffect
 
   // Scroll to top on component mount
   useEffect(() => {
@@ -355,8 +355,21 @@ const Gallery = () => {
   }, []);
 
   useEffect(() => {
+    // Set initial visible count based on screen size
+    const isMobile = window.innerWidth < 768;
+    setVisibleCount(isMobile ? 3 : 8);
+    
+    // Handle window resize
+    const handleResize = () => {
+      const isMobileNow = window.innerWidth < 768;
+      setVisibleCount(prev => isMobileNow ? Math.min(3, photos.length) : Math.min(8, photos.length));
+    };
+    
+    window.addEventListener('resize', handleResize);
     fetchPhotos();
-  }, []);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, [photos.length]);
 
   const fetchPhotos = async () => {
     try {
@@ -399,7 +412,19 @@ const Gallery = () => {
                 <Button
                   variant="outline"
                   className="gap-2 group"
-                  onClick={() => setShowGuidelines(!showGuidelines)}
+                  onClick={() => {
+                    const isShowing = !showGuidelines;
+                    setShowGuidelines(isShowing);
+                    if (isShowing) {
+                      const vh = Math.round(window.visualViewport?.height || window.innerHeight);
+                      const isMobile = window.innerWidth < 768;
+                      const step = Math.round(vh * (isMobile ? 0.75 : 0.85));
+                      const current = window.scrollY || window.pageYOffset;
+                      const next = (Math.floor(current / step) + 1) * step;
+                      const maxTop = document.documentElement.scrollHeight - step;
+                      window.scrollTo({ top: Math.min(next, Math.max(0, maxTop)), behavior: "smooth" });
+                    }
+                  }}
                 >
                   {showGuidelines ? (
                     <>
@@ -560,15 +585,29 @@ const Gallery = () => {
               {visibleCount < photos.length && (
                 <div className="mt-8 text-center">
                   <Button
-                    onClick={() =>
-                      setVisibleCount((prev) =>
-                        Math.min(prev + PHOTOS_PER_PAGE, photos.length)
-                      )
-                    }
+                    onClick={() => {
+                      const isMobile = window.innerWidth < 768;
+                      const increment = isMobile ? 3 : 8;
+                      setVisibleCount(prev => Math.min(prev + increment, photos.length));
+                    }}
                     variant="outline"
                     className="px-8 py-6 text-base"
                   >
-                    Load More Photos ({photos.length - visibleCount} remaining)
+                    Load More Photos
+                  </Button>
+                </div>
+              )}
+              {visibleCount > PHOTOS_PER_PAGE && (
+                <div className="mt-4 text-center">
+                  <Button
+                    onClick={() => {
+                      const isMobile = window.innerWidth < 768;
+                      setVisibleCount(isMobile ? 3 : 8);
+                    }}
+                    variant="outline"
+                    className="px-8 py-6 text-base"
+                  >
+                    Show Less
                   </Button>
                 </div>
               )}

@@ -13,7 +13,7 @@ const Footer = () => {
     { name: "Gallery", path: "/gallery", icon: <Camera className="w-4 h-4 mr-2" /> },
     { name: "Flora/Fauna/Fungi", path: "/species", icon: <LeafyGreenIcon className="w-4 h-4 mr-2" /> },
     { name: "Natural Burial", path: "/burial", icon: <Mountain className="w-4 h-4 mr-2" /> },
-    { name: "eCommerce", path: "/shop", icon: <ShoppingCart className="w-4 h-4 mr-2" /> },
+    { name: "Shop", path: "/shop", icon: <ShoppingCart className="w-4 h-4 mr-2" /> },
     { name: "Site Map", path: "/map", icon: <MapIcon className="w-4 h-4 mr-2" /> },
     { name: "Contact", path: "/contact", icon: <MessageCircle className="w-4 h-4 mr-2" /> },
   ];

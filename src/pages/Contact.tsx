@@ -9,6 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
   const { toast } = useToast();
+  
+  const scrollDown = () => {
+    const isMobile = window.innerWidth < 768;
+    const scrollMultiplier = isMobile ? 0.7 : 0.8; 
+    window.scrollBy({
+      top: window.innerHeight * scrollMultiplier,
+      behavior: 'smooth'
+    });
+  };
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -119,13 +128,22 @@ const Contact = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
                 className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               >
-                <Button size="lg" className="gap-2">
+                <Button 
+                  size="lg" 
+                  className="gap-2"
+                  onClick={scrollDown}
+                >
                   Explore Options
                   <ChevronRight className="w-4 h-4" />
                 </Button>
-                <Button variant="outline" size="lg" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="gap-2"
+                  onClick={() => window.open('https://maps.app.goo.gl/hLf36RZKihctRw2f9', '_blank', 'noopener,noreferrer')}
+                >
                   <MapPin className="w-4 h-4" />
-                  Visit Our Grounds
+                  Visit Site
                 </Button>
               </motion.div>
             </div>

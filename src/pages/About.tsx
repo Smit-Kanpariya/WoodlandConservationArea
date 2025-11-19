@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ import {
 import AudioButton from '@/components/AudioButton';
 
 const About = () => {
+  const navigate = useNavigate();
   const coreValues = [
     {
       icon: Leaf,
@@ -77,10 +79,12 @@ const About = () => {
                 />
                 <Button
                   variant="outline"
-                  className="gap-2 border-primary/20 text-foreground hover:bg-primary/5 hover:border-primary/30 px-6 py-3 rounded-full font-medium text-base transition-all duration-300"
+                  className="gap-2 border-2 text-foreground hover:bg-primary/90 hover:text-primary-foreground hover:border-primary px-6 py-3 rounded-full font-medium text-base transition-all duration-300"
                   onClick={() => {
-                    const element = document.getElementById('our-mission');
-                    element?.scrollIntoView({ behavior: 'smooth' });
+                    const vh = Math.round((window.visualViewport?.height || window.innerHeight) * (window.innerWidth < 768 ? 0.75 : 0.9));
+                    const current = window.scrollY || window.pageYOffset;
+                    const next = Math.min(current + vh, document.documentElement.scrollHeight - vh);
+                    window.scrollTo({ top: next, behavior: 'smooth' });
                   }}
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -349,13 +353,6 @@ const About = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <p className="text-lg text-foreground mb-6">
-                  Ready to be part of our conservation journey?
-                </p>
-                <Button size="lg" className="gap-2">
-                  Join Us Today
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
               </motion.div>
             </div>
           </div>
@@ -386,7 +383,11 @@ const About = () => {
                   Contact us to schedule a visit, volunteer, or support our conservation efforts.
                 </p>
                 <div className="flex flex-wrap justify-center gap-4">
-                  <Button size="lg" className="gap-2">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="gap-2 border-primary/20 hover:border-primary/30"
+                  >
                     <Phone className="w-4 h-4" />
                     Call Us
                   </Button>
@@ -402,9 +403,10 @@ const About = () => {
                     variant="outline"
                     size="lg"
                     className="gap-2 border-primary/20 hover:border-primary/30"
+                    onClick={() => navigate('/map')}
                   >
                     <MapPin className="w-4 h-4" />
-                    Visit Us
+                    Site Map
                   </Button>
                 </div>
               </div>

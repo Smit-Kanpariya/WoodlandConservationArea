@@ -514,6 +514,27 @@ const SiteMap = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Visit Us Button and Directions Link - Moved outside the card */}
+          <div className="mt-8 text-center">
+            <a 
+              href="https://maps.app.goo.gl/hLf36RZKihctRw2f9"
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <Button 
+                size="lg" 
+                className="gap-2 bg-primary text-white hover:bg-primary/90 transition-colors"
+              >
+                <MapPin className="w-5 h-5" />
+                Visit Us
+              </Button>
+              <p className="text-sm text-muted-foreground mt-2">
+                Get Directions via Google Maps
+              </p>
+            </a>
+          </div>
         </section>
       </div>
     </div>

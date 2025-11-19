@@ -35,6 +35,15 @@ const Shop = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const shopContentRef = React.useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+
+  const scrollDownOnePage = () => {
+    const isMobile = window.innerWidth < 768;
+    const scrollMultiplier = isMobile ? 1.36 : 1.2; 
+    window.scrollBy({
+      top: window.innerHeight * scrollMultiplier,
+      behavior: 'smooth'
+    });
+  };
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -255,14 +264,14 @@ const Shop = () => {
                 Purchase sustainable products, experiences, and memberships that
                 directly contribute to protecting our woodland ecosystem.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button size="lg" className="gap-2">
+              <div className="flex justify-center">
+                <Button 
+                  size="lg" 
+                  className="gap-2"
+                  onClick={scrollDownOnePage}
+                >
                   Shop Now
                   <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="lg" className="gap-2">
-                  <Info className="w-4 h-4" />
-                  Learn More
                 </Button>
               </div>
             </div>
@@ -560,17 +569,6 @@ const Shop = () => {
               conservation efforts, habitat restoration, and educational
               programs that protect this unique woodland ecosystem.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" variant="secondary" className="px-8 py-3">
-                Learn About Our Impact
-              </Button>
-              <Button
-                size="lg"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground px-8 py-3"
-              >
-                Become a Member
-              </Button>
-            </div>
           </div>
         </section>
 
