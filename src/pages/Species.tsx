@@ -2,15 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Leaf,
@@ -19,28 +15,12 @@ import {
   Search,
   AlertCircle,
   Mail,
-  Calendar,
-  MapPin,
-  Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import AudioButton from "@/components/AudioButton";
-
-interface Species {
-  id: number;
-  name: string;
-  scientificName: string;
-  category: "flora" | "fauna" | "fungi";
-  status: string;
-  description: string;
-  habitat: string;
-  conservation: string;
-  audioText: string;
-  lastSighted?: string;
-  region?: string;
-  image: string;
-}
+import { speciesData } from "@/data/speciesData";
+import SpeciesCard from "@/components/SpeciesCard";
+import ConservationGuide from "@/components/ConservationGuide";
 
 const Species = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -93,113 +73,22 @@ const Species = () => {
     }
   };
 
+  // Calculate dynamic stats
+  const totalSpecies = speciesData.length;
+  // Assuming "Endemic" isn't explicitly tracked in the current data model, 
+  // we'll count species with specific regions for now or keep it as a placeholder logic
+  // For this example, let's say all species with a specific region listed are "endemic" to the park
+  const endemicCount = speciesData.filter(s => s.region).length; 
+  const atRiskCount = speciesData.filter(s => ["Protected", "Monitored"].includes(s.status)).length;
+
   const categories = [
-    { id: "all", name: "All Species", icon: Search, count: 45 },
-    { id: "flora", name: "Flora", icon: Leaf, count: 28 },
-    { id: "fauna", name: "Fauna", icon: Bird, count: 12 },
-    { id: "fungi", name: "Fungi", icon: Bug, count: 5 },
+    { id: "all", name: "All Species", icon: Search, count: totalSpecies },
+    { id: "flora", name: "Flora", icon: Leaf, count: speciesData.filter(s => s.category === "flora").length },
+    { id: "fauna", name: "Fauna", icon: Bird, count: speciesData.filter(s => s.category === "fauna").length },
+    { id: "fungi", name: "Fungi", icon: Bug, count: speciesData.filter(s => s.category === "fungi").length },
   ];
 
-  const species: Species[] = [
-    {
-      id: 1,
-      name: "Yellow Birch",
-      scientificName: "Betula alleghaniensis",
-      category: "flora",
-      status: "Common",
-      description:
-        "Distinctive tree with golden-bronze peeling bark, native to eastern North America. Known for its longevity, with some specimens living over 300 years. The bark was historically used by Indigenous peoples for making canoes and containers.",
-      habitat: "Well-drained soils, mixed forests",
-      conservation: "Stable",
-      audioText:
-        "Yellow Birch, scientific name Betula alleghaniensis. A distinctive tree with golden-bronze peeling bark, native to eastern North America. Can live over 300 years. Found in well-drained soils and mixed forests. Conservation status is stable.",
-      lastSighted: "October 15, 2025",
-      region: "Northeast Trail",
-      image: "/1.1.png",
-    },
-    {
-      id: 2,
-      name: "Red Squirrel",
-      scientificName: "Tamiasciurus hudsonicus",
-      category: "fauna",
-      status: "Common",
-      description:
-        "Small, energetic squirrel with reddish-brown fur and a white underbelly. These territorial creatures are known for their distinctive chattering calls and play a crucial role in seed dispersal for coniferous trees.",
-      habitat: "Coniferous and mixed forests",
-      conservation: "Stable",
-      audioText:
-        "Red Squirrel, scientific name Tamiasciurus hudsonicus. Small, energetic squirrel with reddish-brown fur. Important seed disperser for coniferous trees. Found in coniferous and mixed forests. Conservation status is stable.",
-      lastSighted: "October 28, 2025",
-      region: "Pine Ridge Area",
-      image: "/1.2.png",
-    },
-    {
-      id: 3,
-      name: "Wild Ginger",
-      scientificName: "Asarum canadense",
-      category: "flora",
-      status: "Uncommon",
-      description:
-        "A low-growing woodland plant with distinctive heart-shaped leaves and unusual burgundy flowers that grow at ground level. The plant has a ginger-like aroma when crushed and was used by Indigenous peoples for medicinal purposes.",
-      habitat: "Rich, moist woodland floors",
-      conservation: "Monitored",
-      audioText:
-        "Wild Ginger, scientific name Asarum canadense. Low-growing woodland plant with heart-shaped leaves and hidden burgundy flowers. Found in rich, moist woodland floors. Conservation status is monitored.",
-      lastSighted: "May 5, 2025",
-      region: "Maple Grove",
-      image: "/1.3.png",
-    },
-    {
-      id: 4,
-      name: "Oyster Mushroom",
-      scientificName: "Pleurotus ostreatus",
-      category: "fungi",
-      status: "Seasonal",
-      description:
-        "An edible bracket fungus with a distinctive fan or oyster-shaped cap. These important decomposers grow in shelf-like clusters on dead or dying hardwood trees, playing a vital role in nutrient cycling within the forest ecosystem.",
-      habitat: "Dead or dying hardwood trees",
-      conservation: "Stable",
-      audioText:
-        "Oyster Mushroom, scientific name Pleurotus ostreatus. Edible bracket fungus that grows on deciduous trees, helping decompose dead wood. Found on dead or dying hardwood trees. Conservation status is stable.",
-      lastSighted: "September 22, 2025",
-      region: "Oak Valley",
-      image: "/1.4.png",
-    },
-    {
-      id: 5,
-      name: "Wood Duck",
-      scientificName: "Aix sponsa",
-      category: "fauna",
-      status: "Migratory",
-      description:
-        "One of the most colorful North American waterfowl, known for its striking plumage. Males have iridescent green and purple heads with distinctive white markings, while females have subtle gray-brown plumage. They nest in tree cavities near water.",
-      habitat: "Wooded wetlands, ponds",
-      conservation: "Recovered",
-      audioText:
-        "Wood Duck, scientific name Aix sponsa. Colorful waterfowl that nests in tree cavities near wetlands. Males have distinctive iridescent plumage. Found in wooded wetlands and ponds. Conservation status is recovered.",
-      lastSighted: "October 10, 2025",
-      region: "Marshlands",
-      image: "/1.5.png",
-    },
-    {
-      id: 6,
-      name: "Trillium",
-      scientificName: "Trillium grandiflorum",
-      category: "flora",
-      status: "Protected",
-      description:
-        "The provincial flower of Ontario, this perennial wildflower is known for its three-petaled white flowers that gradually turn pink with age. It takes up to 17 years to mature and produce flowers, making it particularly vulnerable to disturbance.",
-      habitat: "Rich, deciduous forests",
-      conservation: "Protected",
-      audioText:
-        "Trillium, scientific name Trillium grandiflorum. Iconic spring wildflower with three white petals that turn pink with age. Symbol of Ontario. Found in rich, deciduous forests. Conservation status is protected. Please do not pick or disturb this protected species.",
-      lastSighted: "May 15, 2025",
-      region: "Conservation Area",
-      image: "/1.6.png",
-    },
-  ];
-
-  const filteredSpecies = species.filter((specimen) => {
+  const filteredSpecies = speciesData.filter((specimen) => {
     const matchesCategory =
       selectedCategory === "all" || specimen.category === selectedCategory;
     
@@ -208,42 +97,14 @@ const Species = () => {
     }
     
     const searchLower = searchQuery.toLowerCase().trim();
-    const nameWords = specimen.name.toLowerCase().split(/\s+/);
-    const scientificNameWords = specimen.scientificName.toLowerCase().split(/\s+/);
     
-    // Check if any word in the name or scientific name starts with the search query
-    const matchesName = nameWords.some(word => word.startsWith(searchLower));
-    const matchesScientificName = scientificNameWords.some(word => word.startsWith(searchLower));
-    
+    // Improved search logic: check if search string is included in name or scientific name
     return (
       matchesCategory && 
-      (matchesName || matchesScientificName ||
-       specimen.name.toLowerCase().includes(searchLower) ||
+      (specimen.name.toLowerCase().includes(searchLower) ||
        specimen.scientificName.toLowerCase().includes(searchLower))
     );
   });
-
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "protected":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
-      case "monitored":
-        return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
-      case "recovered":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-      case "common":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
-      case "uncommon":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300";
-      case "seasonal":
-        return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300";
-      case "migratory":
-        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-    }
-  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -255,19 +116,6 @@ const Species = () => {
         return <Bug className="w-4 h-4 mr-1.5" />;
       default:
         return <Search className="w-4 h-4 mr-1.5" />;
-    }
-  };
-
-  const getConservationIcon = (conservation: string) => {
-    switch (conservation.toLowerCase()) {
-      case "protected":
-        return <Shield className="w-4 h-4 mr-1.5" />;
-      case "monitored":
-        return <AlertCircle className="w-4 h-4 mr-1.5" />;
-      case "recovered":
-        return <Shield className="w-4 h-4 mr-1.5" />;
-      default:
-        return null;
     }
   };
 
@@ -381,7 +229,7 @@ const Species = () => {
                     <p className="text-sm font-medium text-muted-foreground">
                       Total Species
                     </p>
-                    <h3 className="text-3xl font-bold">45</h3>
+                    <h3 className="text-3xl font-bold">{totalSpecies}</h3>
                   </div>
                   <div className="p-3 rounded-full bg-primary/10">
                     <Search className="h-6 w-6 text-primary" />
@@ -400,7 +248,7 @@ const Species = () => {
                     <p className="text-sm font-medium text-muted-foreground">
                       Endemic Species
                     </p>
-                    <h3 className="text-3xl font-bold">12</h3>
+                    <h3 className="text-3xl font-bold">{endemicCount}</h3>
                   </div>
                   <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
                     <Leaf className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -419,7 +267,7 @@ const Species = () => {
                     <p className="text-sm font-medium text-muted-foreground">
                       At Risk
                     </p>
-                    <h3 className="text-3xl font-bold">3</h3>
+                    <h3 className="text-3xl font-bold">{atRiskCount}</h3>
                   </div>
                   <div className="p-3 rounded-full bg-amber-100 dark:bg-amber-900/30">
                     <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -476,76 +324,7 @@ const Species = () => {
             <AnimatePresence>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredSpecies.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    layout
-                  >
-                    <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                      <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={item.image} 
-                          alt={item.name}
-                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                        />
-                        <div className="absolute bottom-4 right-4">
-                          <AudioButton
-                            text={item.audioText}
-                            variant="outline"
-                            size="sm"
-                            className="rounded-full w-10 h-10 bg-background/80 backdrop-blur-sm"
-                          />
-                        </div>
-                      </div>
-                      <CardContent className="p-6 flex-1 flex flex-col">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="text-xl font-bold text-foreground">
-                              {item.name}
-                            </h3>
-                            <p className="text-sm italic text-muted-foreground">
-                              {item.scientificName}
-                            </p>
-                          </div>
-                          <Badge
-                            variant="outline"
-                            className={`${getStatusColor(item.status)} border-0 capitalize`}
-                          >
-                            {item.status}
-                          </Badge>
-                        </div>
-
-                        <p className="text-muted-foreground text-sm mb-6 line-clamp-3">
-                          {item.description}
-                        </p>
-
-                        <div className="mt-auto space-y-3 pt-4 border-t border-border/50">
-                          <div className="flex items-center text-sm">
-                            <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>{item.habitat}</span>
-                          </div>
-                          <div className="flex items-center text-sm">
-                            <Shield className="h-4 w-4 mr-2 text-muted-foreground" />
-                            <span>Conservation: </span>
-                            <span
-                              className={`ml-1 font-medium ${getStatusColor(item.conservation)}`}
-                            >
-                              {item.conservation}
-                            </span>
-                          </div>
-                          {item.lastSighted && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4 mr-2" />
-                              <span>Last sighted: {item.lastSighted}</span>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                  <SpeciesCard key={item.id} species={item} />
                 ))}
               </div>
             </AnimatePresence>
@@ -611,61 +390,7 @@ const Species = () => {
 
         {/* Conservation Status Guide */}
         <section className="mb-16">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-primary" />
-                Understanding Conservation Status
-              </CardTitle>
-              <CardDescription>
-                Learn what each conservation status means for our local species
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                    <span className="font-medium">Protected</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Species protected by law. Harming or disturbing these
-                    species is illegal.
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-3 w-3 rounded-full bg-amber-500"></div>
-                    <span className="font-medium">Monitored</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Species of special concern that we're actively monitoring
-                    for population changes.
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                    <span className="font-medium">Recovered</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Previously at-risk species that have shown significant
-                    population recovery.
-                  </p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                    <span className="font-medium">Common</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Species that are currently abundant and not at risk in our
-                    conservation area.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ConservationGuide />
         </section>
       </div>
     </div>

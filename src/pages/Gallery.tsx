@@ -8,6 +8,8 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  X,
+  Maximize2,
 } from "lucide-react";
 import AudioButton from "@/components/AudioButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Photo {
   id: string;
@@ -33,7 +36,13 @@ interface Photo {
   created_at: string;
 }
 
-const PhotoCard = ({ photo }: { photo: Photo }) => {
+const PhotoCard = ({
+  photo,
+  onPreview,
+}: {
+  photo: Photo;
+  onPreview: (photo: Photo) => void;
+}) => {
   // Don't render if we don't have a photo
   if (!photo?.id) return null;
 
@@ -68,12 +77,20 @@ const PhotoCard = ({ photo }: { photo: Photo }) => {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/5">
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.3 }}
+      className="group relative overflow-hidden rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 cursor-pointer"
+      onClick={() => onPreview(photo)}
+    >
       <div className="relative aspect-square overflow-hidden">
         <img
           src={photo.image_url}
           alt={photo.caption || "Woodland conservation photo"}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
         />
 
@@ -92,16 +109,31 @@ const PhotoCard = ({ photo }: { photo: Photo }) => {
               />
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
-            onClick={handleDownload}
-            title="Download photo"
-          >
-            <Download className="h-4 w-4" />
-            <span className="sr-only">Download</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview(photo);
+              }}
+              title="View full size"
+            >
+              <Maximize2 className="h-4 w-4" />
+              <span className="sr-only">View</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="bg-black/30 hover:bg-black/50 text-white backdrop-blur-sm"
+              onClick={handleDownload}
+              title="Download photo"
+            >
+              <Download className="h-4 w-4" />
+              <span className="sr-only">Download</span>
+            </Button>
+          </div>
         </div>
 
         {/* Caption overlay */}
@@ -120,7 +152,7 @@ const PhotoCard = ({ photo }: { photo: Photo }) => {
           </p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
@@ -347,6 +379,7 @@ const Gallery = () => {
   const [loading, setLoading] = useState(true);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [visibleCount, setVisibleCount] = useState(0);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const PHOTOS_PER_PAGE = 0; // Will be set in useEffect
 
   // Scroll to top on component mount
@@ -358,17 +391,19 @@ const Gallery = () => {
     // Set initial visible count based on screen size
     const isMobile = window.innerWidth < 768;
     setVisibleCount(isMobile ? 3 : 8);
-    
+
     // Handle window resize
     const handleResize = () => {
       const isMobileNow = window.innerWidth < 768;
-      setVisibleCount(prev => isMobileNow ? Math.min(3, photos.length) : Math.min(8, photos.length));
+      setVisibleCount((prev) =>
+        isMobileNow ? Math.min(3, photos.length) : Math.min(8, photos.length)
+      );
     };
-    
-    window.addEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
     fetchPhotos();
-    
-    return () => window.removeEventListener('resize', handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
   }, [photos.length]);
 
   const fetchPhotos = async () => {
@@ -401,11 +436,13 @@ const Gallery = () => {
                 Community Gallery
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-                Share Your <span className="text-primary">Woodland</span> Moments
+                Share Your <span className="text-primary">Woodland</span>{" "}
+                Moments
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
                 Contribute to our growing collection of conservation area
-                photographs and help document the beauty of our natural heritage.
+                photographs and help document the beauty of our natural
+                heritage.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <PhotoUploadDialog onUploadSuccess={fetchPhotos} />
@@ -416,13 +453,19 @@ const Gallery = () => {
                     const isShowing = !showGuidelines;
                     setShowGuidelines(isShowing);
                     if (isShowing) {
-                      const vh = Math.round(window.visualViewport?.height || window.innerHeight);
+                      const vh = Math.round(
+                        window.visualViewport?.height || window.innerHeight
+                      );
                       const isMobile = window.innerWidth < 768;
                       const step = Math.round(vh * (isMobile ? 0.75 : 0.85));
                       const current = window.scrollY || window.pageYOffset;
                       const next = (Math.floor(current / step) + 1) * step;
-                      const maxTop = document.documentElement.scrollHeight - step;
-                      window.scrollTo({ top: Math.min(next, Math.max(0, maxTop)), behavior: "smooth" });
+                      const maxTop =
+                        document.documentElement.scrollHeight - step;
+                      window.scrollTo({
+                        top: Math.min(next, Math.max(0, maxTop)),
+                        behavior: "smooth",
+                      });
                     }
                   }}
                 >
@@ -456,114 +499,121 @@ const Gallery = () => {
         </div>
 
         {/* Guidelines Section */}
-        {showGuidelines && (
-          <section className="mb-12 transition-all duration-300 ease-in-out">
-            <Card className="border border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-start">
-                  <div className="bg-primary/10 p-3 rounded-lg mr-4">
-                    <Info className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
-                      Photo Submission Guidelines
-                      <AudioButton
-                        text="Photo Upload Guidelines. Help us maintain a high-quality gallery by following these simple guidelines when uploading your photos."
-                        className="ml-2"
-                      />
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div>
+        <AnimatePresence>
+          {showGuidelines && (
+            <motion.section
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-12 overflow-hidden"
+            >
+              <Card className="border border-border/50 bg-background/50 backdrop-blur-sm overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-start">
+                    <div className="bg-primary/10 p-3 rounded-lg mr-4">
+                      <Info className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-foreground mb-4 flex items-center">
+                        Photo Submission Guidelines
+                        <AudioButton
+                          text="Photo Upload Guidelines. Help us maintain a high-quality gallery by following these simple guidelines when uploading your photos."
+                          className="ml-2"
+                        />
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                          <h4 className="font-medium text-foreground mb-3 text-base flex items-center">
+                            <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
+                              1
+                            </span>
+                            What to Photograph
+                          </h4>
+                          <ul className="space-y-2 pl-8">
+                            {[
+                              "Wildlife and their habitats",
+                              "Seasonal changes in the landscape",
+                              "Wetland and forest ecosystems",
+                              "Historical sites and artifacts",
+                              "Trail conditions and scenic views",
+                              "Conservation efforts and projects",
+                            ].map((item) => (
+                              <li
+                                key={item}
+                                className="relative before:content-['•'] before:absolute before:-left-4 before:text-primary"
+                              >
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-foreground mb-3 text-base flex items-center">
+                            <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
+                              2
+                            </span>
+                            Technical Requirements
+                          </h4>
+                          <ul className="space-y-2 pl-8">
+                            {[
+                              "High resolution (min 1200px width)",
+                              "JPG or PNG format only",
+                              "Max file size: 10MB per photo",
+                              "Clear, well-composed images",
+                              "Accurate location and description",
+                              "Respect wildlife and natural habitats",
+                            ].map((item) => (
+                              <li
+                                key={item}
+                                className="relative before:content-['•'] before:absolute before:-left-4 before:text-primary"
+                              >
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="mt-6 pt-6 border-t border-border/50">
                         <h4 className="font-medium text-foreground mb-3 text-base flex items-center">
                           <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
-                            1
+                            3
                           </span>
-                          What to Photograph
+                          Best Practices
                         </h4>
-                        <ul className="space-y-2 pl-8">
-                          {[
-                            "Wildlife and their habitats",
-                            "Seasonal changes in the landscape",
-                            "Wetland and forest ecosystems",
-                            "Historical sites and artifacts",
-                            "Trail conditions and scenic views",
-                            "Conservation efforts and projects",
-                          ].map((item) => (
-                            <li
-                              key={item}
-                              className="relative before:content-['•'] before:absolute before:-left-4 before:text-primary"
-                            >
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-foreground mb-3 text-base flex items-center">
-                          <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
-                            2
-                          </span>
-                          Technical Requirements
-                        </h4>
-                        <ul className="space-y-2 pl-8">
-                          {[
-                            "High resolution (min 1200px width)",
-                            "JPG or PNG format only",
-                            "Max file size: 10MB per photo",
-                            "Clear, well-composed images",
-                            "Accurate location and description",
-                            "Respect wildlife and natural habitats",
-                          ].map((item) => (
-                            <li
-                              key={item}
-                              className="relative before:content-['•'] before:absolute before:-left-4 before:text-primary"
-                            >
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                    <div className="mt-6 pt-6 border-t border-border/50">
-                      <h4 className="font-medium text-foreground mb-3 text-base flex items-center">
-                        <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-2">
-                          3
-                        </span>
-                        Best Practices
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="bg-muted/30 p-4 rounded-lg">
-                          <div className="font-medium text-foreground mb-1">
-                            Lighting
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                          <div className="bg-muted/30 p-4 rounded-lg">
+                            <div className="font-medium text-foreground mb-1">
+                              Lighting
+                            </div>
+                            <p className="text-muted-foreground text-sm">
+                              Shoot during golden hour for best natural lighting
+                            </p>
                           </div>
-                          <p className="text-muted-foreground text-sm">
-                            Shoot during golden hour for best natural lighting
-                          </p>
-                        </div>
-                        <div className="bg-muted/30 p-4 rounded-lg">
-                          <div className="font-medium text-foreground mb-1">
-                            Composition
+                          <div className="bg-muted/30 p-4 rounded-lg">
+                            <div className="font-medium text-foreground mb-1">
+                              Composition
+                            </div>
+                            <p className="text-muted-foreground text-sm">
+                              Use the rule of thirds for balanced photos
+                            </p>
                           </div>
-                          <p className="text-muted-foreground text-sm">
-                            Use the rule of thirds for balanced photos
-                          </p>
-                        </div>
-                        <div className="bg-muted/30 p-4 rounded-lg">
-                          <div className="font-medium text-foreground mb-1">
-                            Ethics
+                          <div className="bg-muted/30 p-4 rounded-lg">
+                            <div className="font-medium text-foreground mb-1">
+                              Ethics
+                            </div>
+                            <p className="text-muted-foreground text-sm">
+                              Maintain a safe distance from wildlife
+                            </p>
                           </div>
-                          <p className="text-muted-foreground text-sm">
-                            Maintain a safe distance from wildlife
-                          </p>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-        )}
+                </CardContent>
+              </Card>
+            </motion.section>
+          )}
+        </AnimatePresence>
 
         {/* Gallery Grid */}
         <section>
@@ -577,18 +627,29 @@ const Gallery = () => {
             </div>
           ) : photos.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {photos.slice(0, visibleCount).map((photo) => (
-                  <PhotoCard key={photo.id} photo={photo} />
-                ))}
-              </div>
+              <motion.div
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              >
+                <AnimatePresence>
+                  {photos.slice(0, visibleCount).map((photo) => (
+                    <PhotoCard
+                      key={photo.id}
+                      photo={photo}
+                      onPreview={setSelectedPhoto}
+                    />
+                  ))}
+                </AnimatePresence>
+              </motion.div>
               {visibleCount < photos.length && (
                 <div className="mt-8 text-center">
                   <Button
                     onClick={() => {
                       const isMobile = window.innerWidth < 768;
                       const increment = isMobile ? 3 : 8;
-                      setVisibleCount(prev => Math.min(prev + increment, photos.length));
+                      setVisibleCount((prev) =>
+                        Math.min(prev + increment, photos.length)
+                      );
                     }}
                     variant="outline"
                     className="px-8 py-6 text-base"
@@ -630,6 +691,49 @@ const Gallery = () => {
           )}
         </section>
       </div>
+
+      {/* Lightbox Preview */}
+      <AnimatePresence>
+        {selectedPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+            onClick={() => setSelectedPhoto(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -top-12 right-0 text-white hover:bg-white/20 rounded-full"
+                onClick={() => setSelectedPhoto(null)}
+              >
+                <X className="h-6 w-6" />
+                <span className="sr-only">Close</span>
+              </Button>
+              <img
+                src={selectedPhoto.image_url}
+                alt={selectedPhoto.caption || "Full size preview"}
+                className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+              />
+              {selectedPhoto.caption && (
+                <div className="mt-4 text-center">
+                  <p className="text-white text-lg font-medium">
+                    {selectedPhoto.caption}
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
