@@ -248,18 +248,6 @@ const SiteMap = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 flex items-center justify-center">
-            Interactive Site Map
-            <AudioButton
-              text="Interactive Site Map. Explore our conservation area with this interactive map showing trails, historical sites, and key ecosystem features. Use the GPS button to find your current location on the map."
-              className="ml-4"
-            />
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
-            Explore our conservation area with this interactive map showing
-            trails, historical sites, and key ecosystem features.
-          </p>
-
           {/* GPS Location Button */}
           <Button
             onClick={getUserLocation}
