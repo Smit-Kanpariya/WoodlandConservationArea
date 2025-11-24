@@ -24,7 +24,7 @@ const Ecosystem = () => {
   const ecosystemFeatures = [
     {
       icon: Trees,
-      title: "🌳 Yellow Birch Forest",
+      title: "Yellow Birch Forest",
       image: yellowBirchImage,
       description:
         "The majestic yellow birch (Betula alleghaniensis) is a keystone species in our conservation area. These native trees, with their distinctive golden-bronze peeling bark, form the backbone of our forest ecosystem. Thriving in the moist, well-drained soils of mixed forests, they create vital habitat for numerous species.",
@@ -39,7 +39,7 @@ const Ecosystem = () => {
     },
     {
       icon: Droplets,
-      title: "💧 Wetland Ecosystem",
+      title: "Wetland Ecosystem",
       image: wetlandImage,
       description:
         "Our protected wetlands are dynamic ecosystems that perform essential ecological functions. These natural water filters improve water quality, control flooding, and provide critical habitat for specialized plants and animals adapted to life in and around water.",
@@ -54,7 +54,7 @@ const Ecosystem = () => {
     },
     {
       icon: Clock,
-      title: "🏚️ Historical Landscape",
+      title: "Historical Landscape",
       image: farmhouseImage,
       description:
         "The stone farmhouse foundation and historic wells on the property offer a tangible connection to the area's agricultural past. These artifacts tell the story of early European settlement and the evolving relationship between humans and the land in Nova Scotia.",
