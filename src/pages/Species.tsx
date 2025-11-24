@@ -39,6 +39,7 @@ interface Species {
   audioText: string;
   lastSighted?: string;
   region?: string;
+  image: string;
 }
 
 const Species = () => {
@@ -114,6 +115,7 @@ const Species = () => {
         "Yellow Birch, scientific name Betula alleghaniensis. A distinctive tree with golden-bronze peeling bark, native to eastern North America. Can live over 300 years. Found in well-drained soils and mixed forests. Conservation status is stable.",
       lastSighted: "October 15, 2025",
       region: "Northeast Trail",
+      image: "/1.1.png",
     },
     {
       id: 2,
@@ -129,6 +131,7 @@ const Species = () => {
         "Red Squirrel, scientific name Tamiasciurus hudsonicus. Small, energetic squirrel with reddish-brown fur. Important seed disperser for coniferous trees. Found in coniferous and mixed forests. Conservation status is stable.",
       lastSighted: "October 28, 2025",
       region: "Pine Ridge Area",
+      image: "/1.2.png",
     },
     {
       id: 3,
@@ -144,6 +147,7 @@ const Species = () => {
         "Wild Ginger, scientific name Asarum canadense. Low-growing woodland plant with heart-shaped leaves and hidden burgundy flowers. Found in rich, moist woodland floors. Conservation status is monitored.",
       lastSighted: "May 5, 2025",
       region: "Maple Grove",
+      image: "/1.3.png",
     },
     {
       id: 4,
@@ -159,6 +163,7 @@ const Species = () => {
         "Oyster Mushroom, scientific name Pleurotus ostreatus. Edible bracket fungus that grows on deciduous trees, helping decompose dead wood. Found on dead or dying hardwood trees. Conservation status is stable.",
       lastSighted: "September 22, 2025",
       region: "Oak Valley",
+      image: "/1.4.png",
     },
     {
       id: 5,
@@ -174,6 +179,7 @@ const Species = () => {
         "Wood Duck, scientific name Aix sponsa. Colorful waterfowl that nests in tree cavities near wetlands. Males have distinctive iridescent plumage. Found in wooded wetlands and ponds. Conservation status is recovered.",
       lastSighted: "October 10, 2025",
       region: "Marshlands",
+      image: "/1.5.png",
     },
     {
       id: 6,
@@ -189,6 +195,7 @@ const Species = () => {
         "Trillium, scientific name Trillium grandiflorum. Iconic spring wildflower with three white petals that turn pink with age. Symbol of Ontario. Found in rich, deciduous forests. Conservation status is protected. Please do not pick or disturb this protected species.",
       lastSighted: "May 15, 2025",
       region: "Conservation Area",
+      image: "/1.6.png",
     },
   ];
 
@@ -478,16 +485,12 @@ const Species = () => {
                     layout
                   >
                     <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                      <div className="relative h-48 bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
-                        {item.category === "flora" && (
-                          <Leaf className="h-16 w-16 text-primary/30" />
-                        )}
-                        {item.category === "fauna" && (
-                          <Bird className="h-16 w-16 text-primary/30" />
-                        )}
-                        {item.category === "fungi" && (
-                          <Bug className="h-16 w-16 text-primary/30" />
-                        )}
+                      <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        />
                         <div className="absolute bottom-4 right-4">
                           <AudioButton
                             text={item.audioText}
