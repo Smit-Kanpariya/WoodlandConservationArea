@@ -63,6 +63,7 @@ const Shop = () => {
       ],
       rating: 4.8,
       inStock: true,
+      image: "/1.png",
       audioText:
         "Native Wildflower Seed Mix, $24.99. Carefully selected mix of native Nova Scotia wildflower seeds, perfect for supporting local pollinators.",
     },
@@ -81,6 +82,7 @@ const Shop = () => {
       ],
       rating: 4.9,
       inStock: true,
+      image: "/2.png",
       audioText:
         "Yellow Birch Syrup, $32.50. Artisanal syrup made from yellow birch sap, harvested sustainably from our conservation area.",
     },
@@ -99,6 +101,7 @@ const Shop = () => {
       ],
       rating: 5.0,
       inStock: true,
+      image: "/3.png",
       audioText:
         "Conservation Guided Tour, $45.00. Expert-led 2-hour guided tour of our conservation area, including historical sites and wildlife spotting.",
     },
@@ -117,6 +120,7 @@ const Shop = () => {
       ],
       rating: 4.7,
       inStock: false,
+      image: "/4.png",
       audioText:
         "Handcrafted Birch Bark Basket, $89.99. Traditional basket woven from sustainably collected birch bark by local Indigenous artisans. Currently out of stock.",
     },
@@ -135,6 +139,7 @@ const Shop = () => {
       ],
       rating: 4.9,
       inStock: true,
+      image: "/5.png",
       audioText:
         "Conservation Membership, $75.00 annually. Supporting our conservation efforts with exclusive benefits and updates.",
     },
@@ -153,6 +158,7 @@ const Shop = () => {
       ],
       rating: 4.8,
       inStock: true,
+      image: "/6.png",
       audioText:
         "Woodland Photography Workshop, $125.00. Full-day photography workshop focused on capturing the beauty of woodland ecosystems.",
     },
@@ -333,8 +339,12 @@ const Shop = () => {
                         <Card key={product.id} className="border-border/50">
                           <CardContent className="p-4">
                             <div className="flex gap-4">
-                              <div className="flex-shrink-0 w-20 h-20 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                                <Package className="w-8 h-8 text-primary" />
+                              <div className="flex-shrink-0 w-20 h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                                <img 
+                                  src={product.image} 
+                                  alt={product.name}
+                                  className="w-full h-full object-cover"
+                                />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
@@ -467,9 +477,13 @@ const Shop = () => {
             {filteredProducts.map((product) => (
               <Card key={product.id} className="event-card">
                 <div className="relative">
-                  {/* Product Image Placeholder */}
-                  <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <ShoppingCart className="w-12 h-12 text-muted-foreground" />
+                  {/* Product Image */}
+                  <div className="w-full h-48 bg-muted flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
                   </div>
                   <div className="absolute top-2 right-2">
                     <AudioButton
