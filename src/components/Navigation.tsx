@@ -12,6 +12,7 @@ import {
   Clock,
   LogOut as LogOutIcon,
 } from "lucide-react";
+import WeatherWidget from "./WeatherWidget";
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/hooks/useAuth";
@@ -127,18 +128,7 @@ const Navigation = () => {
 
           {/* Theme Toggle and Mobile Menu Button */}
           <div className="flex items-center space-x-1 ml-auto">
-            <Button
-              onClick={() =>
-                playTextToSpeech("Woodland Conservation - St. Margaret's Bay")
-              }
-              variant="ghost"
-              size="icon"
-              className="p-0"
-              aria-label="Text to Speech"
-              title="Text to Speech"
-            >
-              <Volume2 className="w-4 h-4" />
-            </Button>
+            <WeatherWidget />
             <Button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               variant="outline"

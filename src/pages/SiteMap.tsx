@@ -1,115 +1,177 @@
-import React, { useState, useEffect } from "react";
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+
+// Extend Leaflet types to include tap property
+declare module 'leaflet' {
+  interface Map {
+    tap?: {
+      enable: () => void;
+      disable: () => void;
+      enabled: () => boolean;
+    };
+  }
+}
 import { Badge } from "@/components/ui/badge";
-import {
-  MapPin,
-  Navigation,
-  Home,
-  Trees,
-  Droplets,
-  Clock,
-  Compass,
-  Map as MapIcon,
-  ChevronRight,
-} from "lucide-react";
+import { MapPin, Navigation, Home, Trees, Droplets, Clock, ChevronRight, Map as MapIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import AudioButton from "@/components/AudioButton";
 
-const SiteMap = () => {
-  const [userLocation, setUserLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-  const [showUserPosition, setShowUserPosition] = useState(false);
+// Utility functions for feature styling
+const getFeatureBackground = (featureType: string): string => {
+  switch (featureType.toLowerCase()) {
+    case 'trail':
+      return 'bg-amber-100 border-amber-300';
+    case 'viewpoint':
+      return 'bg-blue-100 border-blue-300';
+    case 'facility':
+      return 'bg-green-100 border-green-300';
+    case 'water':
+      return 'bg-cyan-100 border-cyan-300';
+    default:
+      return 'bg-gray-100 border-gray-300';
+  }
+};
 
-  // Site boundaries and features (in a real app, these would be actual GPS coordinates)
-  const siteFeatures = [
+const getFeatureTextColor = (featureType: string): string => {
+  switch (featureType.toLowerCase()) {
+    case 'trail':
+      return 'text-amber-800';
+    case 'viewpoint':
+      return 'text-blue-800';
+    case 'facility':
+      return 'text-green-800';
+    case 'water':
+      return 'text-cyan-800';
+    default:
+      return 'text-gray-800';
+  }
+};
+
+
+// Leaflet imports
+import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+});
+
+// Map configuration
+const mapConfig = {
+  center: { lat: 44.623917, lng: -63.920472 },
+  zoom: 17,
+  areas: {
+    siteBorder: [
+      [44.6267252, -63.9236383] as [number, number],
+      [44.6171265, -63.9075548] as [number, number],
+      [44.6159954, -63.9082112] as [number, number],
+      [44.6196995, -63.9140457] as [number, number],
+      [44.6203791, -63.9140672] as [number, number],
+      [44.6206197, -63.9151561] as [number, number],
+      [44.6205651, -63.9154160] as [number, number],
+      [44.6217831, -63.9173686] as [number, number],
+      [44.6219817, -63.9172345] as [number, number],
+      [44.6222223, -63.9178805] as [number, number],
+      [44.6246191, -63.9215955] as [number, number],
+      [44.6253524, -63.9228526] as [number, number],
+      [44.6266502, -63.9238271] as [number, number],
+      [44.6267252, -63.9236383] as [number, number]
+    ],
+    rewildingArea: [
+      [44.6258752, -63.9221694] as [number, number],
+      [44.6253524, -63.9228526] as [number, number],
+      [44.6266502, -63.9238271] as [number, number],
+      [44.6267252, -63.9236383] as [number, number],
+      [44.6258752, -63.9221694] as [number, number]
+    ],
+    yellowBirchArea: [
+      [44.6247135, -63.9202481] as [number, number],
+      [44.6258752, -63.9221694] as [number, number],
+      [44.6253524, -63.9228526] as [number, number]
+    ]
+  },
+  features: [
     {
       id: "trailhead",
       name: "Trailhead",
       type: "access",
-      position: { x: 15, y: 20 },
-      icon: MapPin,
+      position: [44.6245, -63.9200],
+      icon: '📍',
       description: "Main entrance and parking area for conservation trails",
-      audioText:
-        "Trailhead. Main entrance and parking area for conservation trails.",
+      audioText: "Trailhead. Main entrance and parking area for conservation trails.",
     },
     {
       id: "farmhouse",
       name: "Farmhouse Foundation",
       type: "historical",
-      position: { x: 40, y: 35 },
-      icon: Home,
+      position: [44.6235, -63.9210],
+      icon: '🏠',
       description: "Archaeological remains of the original 1800s farmhouse",
-      audioText:
-        "Farmhouse Foundation. Archaeological remains of the original 1800s farmhouse. Click for more historical information.",
-    },
-    {
-      id: "well1",
-      name: "Historic Well #1",
-      type: "historical",
-      position: { x: 45, y: 40 },
-      icon: Clock,
-      description: "Original well from the farming settlement period",
-      audioText:
-        "Historic Well Number 1. Original well from the farming settlement period.",
-    },
-    {
-      id: "well2",
-      name: "Historic Well #2",
-      type: "historical",
-      position: { x: 38, y: 50 },
-      icon: Clock,
-      description: "Secondary well structure, partially preserved",
-      audioText:
-        "Historic Well Number 2. Secondary well structure, partially preserved.",
-    },
-    {
-      id: "sitting-area",
-      name: "Sitting Area",
-      type: "amenity",
-      position: { x: 55, y: 45 },
-      icon: MapPin,
-      description: "Peaceful rest area with benches overlooking the wetland",
-      audioText:
-        "Sitting Area. Peaceful rest area with benches overlooking the wetland.",
+      audioText: "Farmhouse Foundation. Archaeological remains of the original 1800s farmhouse.",
     },
     {
       id: "yellow-birch",
       name: "Yellow Birch Grove",
       type: "ecosystem",
-      position: { x: 70, y: 25 },
-      icon: Trees,
+      position: [44.6225, -63.9195],
+      icon: '🌳',
       description: "Ancient yellow birch trees, some over 200 years old",
-      audioText:
-        "Yellow Birch Grove. Ancient yellow birch trees, some over 200 years old.",
+      audioText: "Yellow Birch Grove. Ancient yellow birch trees, some over 200 years old.",
     },
     {
       id: "wetland1",
       name: "Primary Wetland",
       type: "ecosystem",
-      position: { x: 25, y: 60 },
-      icon: Droplets,
+      position: [44.6220, -63.9220],
+      icon: '💧',
       description: "Main wetland area supporting diverse wildlife",
-      audioText:
-        "Primary Wetland. Main wetland area supporting diverse wildlife.",
+      audioText: "Primary Wetland. Main wetland area supporting diverse wildlife.",
     },
     {
-      id: "wetland2",
-      name: "Secondary Wetland",
-      type: "ecosystem",
-      position: { x: 65, y: 70 },
-      icon: Droplets,
-      description: "Smaller wetland connected to the primary system",
-      audioText:
-        "Secondary Wetland. Smaller wetland connected to the primary system.",
+      id: "sitting-area",
+      name: "Sitting Area",
+      type: "amenity",
+      position: [44.6240, -63.9210],
+      icon: '🪑',
+      description: "Peaceful rest area with benches",
+      audioText: "Sitting Area. Peaceful rest area with benches.",
     },
-  ];
+  ]
+};
 
+// Component to handle map settings
+const MapSettings = () => {
+  const map = useMap();
+  
+  useEffect(() => {
+    // Disable all interactions
+    map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.boxZoom.disable();
+    map.keyboard.disable();
+    map.scrollWheelZoom.disable();
+    if (map.tap) map.tap.disable();
+    
+    // Set view to center
+    map.setView([mapConfig.center.lat, mapConfig.center.lng], mapConfig.zoom);
+  }, [map]);
+
+  return null;
+};
+
+const SiteMap = () => {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
-  const [hoveredFeature, setHoveredFeature] = useState<string | null>(null);
-
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -118,13 +180,10 @@ const SiteMap = () => {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           });
-          setShowUserPosition(true);
         },
         (error) => {
           console.error("Error getting location:", error);
-          alert(
-            "Unable to get your location. Please ensure location services are enabled."
-          );
+          alert("Unable to get your location. Please ensure location services are enabled.");
         }
       );
     } else {
@@ -134,31 +193,21 @@ const SiteMap = () => {
 
   const getFeatureColor = (type: string) => {
     switch (type) {
-      case "access":
-        return "text-accent";
-      case "historical":
-        return "text-destructive";
-      case "ecosystem":
-        return "text-primary";
-      case "amenity":
-        return "text-secondary-foreground";
-      default:
-        return "text-muted-foreground";
+      case "access": return "bg-accent/20 border-accent/70";
+      case "historical": return "bg-destructive/20 border-destructive/70";
+      case "ecosystem": return "bg-primary/20 border-primary/70";
+      case "amenity": return "bg-secondary/20 border-secondary/70";
+      default: return "bg-muted/20 border-muted-foreground/70";
     }
   };
 
-  const getFeatureBackground = (type: string) => {
+  const getFeatureTextColor = (type: string) => {
     switch (type) {
-      case "access":
-        return "bg-accent/20";
-      case "historical":
-        return "bg-destructive/20";
-      case "ecosystem":
-        return "bg-primary/20";
-      case "amenity":
-        return "bg-secondary/40";
-      default:
-        return "bg-muted/20";
+      case "access": return "text-accent-foreground";
+      case "historical": return "text-destructive-foreground";
+      case "ecosystem": return "text-primary-foreground";
+      case "amenity": return "text-secondary-foreground";
+      default: return "text-muted-foreground";
     }
   };
 
@@ -166,7 +215,7 @@ const SiteMap = () => {
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Hero Section */}
       <section className="relative py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/src/assets/hero-woodland.jpg')] bg-cover bg-center opacity-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="bg-background/90 backdrop-blur-sm rounded-2xl p-8 md:p-12 shadow-lg border border-primary/10">
             <div className="max-w-4xl mx-auto text-center">
@@ -191,21 +240,6 @@ const SiteMap = () => {
                 area, including trails, historical sites, and natural features
                 that make our woodland unique.
               </motion.p>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-              >
-                <Button size="lg" className="gap-2">
-                  Explore Options
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="lg" className="gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Visit Our Grounds
-                </Button>
-              </motion.div>
             </div>
           </div>
         </div>
@@ -213,7 +247,7 @@ const SiteMap = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 flex items-center justify-center">
             Interactive Site Map
             <AudioButton
@@ -221,7 +255,7 @@ const SiteMap = () => {
               className="ml-4"
             />
           </h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-8">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed mb-6">
             Explore our conservation area with this interactive map showing
             trails, historical sites, and key ecosystem features.
           </p>
@@ -230,10 +264,10 @@ const SiteMap = () => {
           <Button
             onClick={getUserLocation}
             size="lg"
-            className="bg-accent hover:bg-accent/90 text-accent-foreground"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground mb-8"
           >
             <Navigation className="w-5 h-5 mr-2" />
-            "YOU ARE HERE" - Find My Location
+            Find My Location
           </Button>
         </div>
 
@@ -250,28 +284,20 @@ const SiteMap = () => {
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-accent/20 rounded-full mr-2"></div>
-                  <span className="text-sm text-foreground no-break">
-                    Access Points
-                  </span>
+                  <div className="w-4 h-4 bg-accent/20 rounded-full border border-accent/70 mr-2"></div>
+                  <span className="text-sm text-foreground">Access Points</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-primary/20 rounded-full mr-2"></div>
-                  <span className="text-sm text-foreground no-break">
-                    Ecosystems
-                  </span>
+                  <div className="w-4 h-4 bg-primary/20 rounded-full border border-primary/70 mr-2"></div>
+                  <span className="text-sm text-foreground">Ecosystems</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-destructive/20 rounded-full mr-2"></div>
-                  <span className="text-sm text-foreground no-break">
-                    Historical Sites
-                  </span>
+                  <div className="w-4 h-4 bg-destructive/20 rounded-full border border-destructive/70 mr-2"></div>
+                  <span className="text-sm text-foreground">Historical Sites</span>
                 </div>
                 <div className="flex items-center">
-                  <div className="w-4 h-4 bg-secondary/40 rounded-full mr-2"></div>
-                  <span className="text-sm text-foreground no-break">
-                    Amenities
-                  </span>
+                  <div className="w-4 h-4 bg-secondary/20 rounded-full border border-secondary/70 mr-2"></div>
+                  <span className="text-sm text-foreground">Amenities</span>
                 </div>
               </div>
             </CardContent>
@@ -280,158 +306,120 @@ const SiteMap = () => {
 
         {/* Interactive Map */}
         <section className="mb-12">
-          <Card className="event-card overflow-hidden">
+          <Card className="overflow-hidden">
             <CardContent className="p-0">
-              <div className="relative bg-gradient-to-br from-primary/10 to-accent/5 h-96 md:h-[500px]">
-                {/* North Arrow */}
-                <div className="absolute top-4 left-4 bg-white/90 rounded-lg p-3 shadow-md">
-                  <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
-                    <MapIcon className="w-6 h-6 text-primary" />
-                  </div>
-                  <span className="text-xs font-medium text-foreground">N</span>
-                </div>
-
-                {/* Site Boundary */}
-                <div className="absolute inset-4 border-2 border-dashed border-primary/40 rounded-lg">
-                  <div className="absolute -top-6 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium">
-                    Conservation Area Boundary
-                  </div>
-                </div>
-
-                {/* Rewilding Area */}
-                <div
-                  className="absolute bg-primary/10 border border-primary/30 rounded-lg"
-                  style={{
-                    left: "20%",
-                    top: "25%",
-                    width: "45%",
-                    height: "35%",
-                  }}
+              <div className="h-[500px] w-full relative">
+                <MapContainer
+                  center={[mapConfig.center.lat, mapConfig.center.lng]}
+                  zoom={mapConfig.zoom}
+                  zoomControl={false}
+                  scrollWheelZoom={false}
+                  dragging={false}
+                  doubleClickZoom={false}
+                  touchZoom={false}
+                  style={{ height: '100%', width: '100%' }}
+                  className="z-0"
                 >
-                  <div className="absolute -top-5 left-2 bg-primary text-primary-foreground px-2 py-1 rounded text-xs font-medium">
-                    Rewilding Area
-                  </div>
-                </div>
-
-                {/* Yellow Birch Area */}
-                <div
-                  className="absolute bg-accent/10 border border-accent/30 rounded-lg"
-                  style={{
-                    left: "60%",
-                    top: "15%",
-                    width: "30%",
-                    height: "25%",
-                  }}
-                >
-                  <div className="absolute -top-5 left-2 bg-accent text-accent-foreground px-2 py-1 rounded text-xs font-medium">
-                    Yellow Birch Area
-                  </div>
-                </div>
-
-                {/* Wetland Areas */}
-                <div
-                  className="absolute bg-blue-100 border border-blue-300 rounded-full"
-                  style={{
-                    left: "20%",
-                    top: "55%",
-                    width: "15%",
-                    height: "20%",
-                  }}
-                ></div>
-                <div
-                  className="absolute bg-blue-100 border border-blue-300 rounded-full"
-                  style={{
-                    left: "60%",
-                    top: "65%",
-                    width: "12%",
-                    height: "15%",
-                  }}
-                ></div>
-
-                {/* Feature Markers */}
-                {siteFeatures.map((feature) => (
-                  <div
-                    key={feature.id}
-                    className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200 ${
-                      hoveredFeature === feature.id ? "scale-125" : "scale-100"
-                    }`}
-                    style={{
-                      left: `${feature.position.x}%`,
-                      top: `${feature.position.y}%`,
+                  <MapSettings />
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  
+                  {/* Site Border */}
+                  <Polygon
+                    positions={mapConfig.areas.siteBorder}
+                    pathOptions={{ 
+                      color: 'var(--primary)',
+                      fillColor: 'var(--primary)',
+                      fillOpacity: 0.1,
+                      weight: 2
                     }}
-                    onMouseEnter={() => setHoveredFeature(feature.id)}
-                    onMouseLeave={() => setHoveredFeature(null)}
-                    onClick={() => setSelectedFeature(feature.id)}
-                  >
-                    <div
-                      className={`w-8 h-8 ${getFeatureBackground(feature.type)} rounded-full flex items-center justify-center border-2 border-white shadow-md hover:shadow-lg`}
+                  />
+                  
+                  {/* Rewilding Area */}
+                  <Polygon
+                    positions={mapConfig.areas.rewildingArea}
+                    pathOptions={{ 
+                      color: 'var(--accent)',
+                      fillColor: 'var(--accent)',
+                      fillOpacity: 0.2,
+                      weight: 2
+                    }}
+                  />
+                  
+                  {/* Yellow Birch Area */}
+                  <Polygon
+                    positions={mapConfig.areas.yellowBirchArea}
+                    pathOptions={{ 
+                      color: 'var(--secondary-foreground)',
+                      fillColor: 'var(--secondary-foreground)',
+                      fillOpacity: 0.2,
+                      weight: 2
+                    }}
+                  />
+
+                  {/* Feature Markers */}
+                  {mapConfig.features.map((feature) => (
+                    <Marker 
+                      key={feature.id} 
+                      position={feature.position as [number, number]}
+                      eventHandlers={{
+                        click: () => setSelectedFeature(feature.id)
+                      }}
                     >
-                      <feature.icon
-                        className={`w-4 h-4 ${getFeatureColor(feature.type)}`}
-                      />
-                    </div>
+                      <Popup>
+                        <div className="font-medium">{feature.name}</div>
+                        <div className="text-sm text-muted-foreground">{feature.description}</div>
+                      </Popup>
+                    </Marker>
+                  ))}
 
-                    {/* Tooltip on hover */}
-                    {hoveredFeature === feature.id && (
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black text-white px-2 py-1 rounded text-xs whitespace-nowrap">
-                        {feature.name}
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {/* User Location Marker */}
-                {showUserPosition && userLocation && (
-                  <div
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
-                    style={{
-                      left: "50%", // Simulated position - in real app, would calculate from GPS
-                      top: "40%",
-                    }}
-                  >
-                    <div className="relative">
-                      <div className="w-6 h-6 bg-red-500 rounded-full border-2 border-white shadow-lg animate-pulse"></div>
-                      <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold whitespace-nowrap">
-                        YOU ARE HERE
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  {/* User Location Marker */}
+                  {userLocation && (
+                    <Marker 
+                      position={[userLocation.lat, userLocation.lng]}
+                      icon={L.divIcon({
+                        className: 'user-location-marker',
+                        html: '📍',
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 32],
+                        popupAnchor: [0, -32]
+                      })}
+                    >
+                      <Popup>Your Location</Popup>
+                    </Marker>
+                  )}
+                </MapContainer>
               </div>
             </CardContent>
           </Card>
         </section>
 
-        {/* Feature Details */}
+        {/* Selected Feature Details */}
         {selectedFeature && (
           <section className="mb-12">
-            {siteFeatures
+            {mapConfig.features
               .filter((feature) => feature.id === selectedFeature)
               .map((feature) => (
                 <Card key={feature.id} className="event-card">
-                  <CardContent className="p-8">
+                  <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center">
-                        <div
-                          className={`w-12 h-12 ${getFeatureBackground(feature.type)} rounded-full flex items-center justify-center mr-4`}
-                        >
-                          <feature.icon
-                            className={`w-6 h-6 ${getFeatureColor(feature.type)}`}
-                          />
+                        <div className={`w-12 h-12 ${getFeatureBackground(feature.type.split(' ')[0])} rounded-full flex items-center justify-center border-2 ${getFeatureTextColor(feature.type.split(' ')[0])} text-xl`}>
+                          {feature.icon}
                         </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-foreground no-break">
+                        <div className="ml-4">
+                          <h3 className="text-2xl font-bold text-foreground">
                             {feature.name}
                           </h3>
                           <span className="text-sm text-muted-foreground capitalize">
-                            {feature.type} Feature
+                            {feature.type}
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <AudioButton
-                          text={`${feature.audioText} ${feature.id === "farmhouse" ? "The farmhouse was built in the 1850s by the Morrison family, who farmed this land for three generations. The foundation stones were quarried locally and show evidence of traditional building techniques of the era." : ""}`}
-                        />
+                        <AudioButton text={feature.audioText} />
                         <Button
                           variant="outline"
                           size="sm"
@@ -444,24 +432,6 @@ const SiteMap = () => {
                     <p className="text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
-
-                    {/* Additional historical information for farmhouse */}
-                    {feature.id === "farmhouse" && (
-                      <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                        <h4 className="font-semibold text-foreground mb-2 no-break">
-                          Historical Information
-                        </h4>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
-                          The farmhouse was built in the 1850s by the Morrison
-                          family, who farmed this land for three generations.
-                          The foundation stones were quarried locally and show
-                          evidence of traditional building techniques of the
-                          era. Archaeological surveys have revealed artifacts
-                          including pottery fragments, metal tools, and evidence
-                          of a root cellar.
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               ))}
@@ -482,40 +452,28 @@ const SiteMap = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="font-semibold mb-3 no-break">
-                    Interactive Features:
-                  </h3>
+                  <h3 className="font-semibold mb-3">Interactive Features:</h3>
                   <ul className="space-y-2 text-primary-foreground/90">
-                    <li>
-                      • Click on any marker to learn more about that feature
-                    </li>
-                    <li>
-                      • Use the "YOU ARE HERE" button to find your GPS location
-                    </li>
-                    <li>• Hover over markers for quick feature names</li>
-                    <li>• Map shows all major trails and conservation areas</li>
+                    <li>• Click on any marker to learn more about that feature</li>
+                    <li>• Use the location button to find your current position</li>
+                    <li>• Zoom and pan to explore different areas</li>
+                    <li>• View different conservation zones and their boundaries</li>
                   </ul>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-3 no-break">
-                    Planning Your Visit:
-                  </h3>
+                  <h3 className="font-semibold mb-3">Planning Your Visit:</h3>
                   <ul className="space-y-2 text-primary-foreground/90">
-                    <li>
-                      • Start at the trailhead for parking and information
-                    </li>
+                    <li>• Start at the trailhead for parking and information</li>
                     <li>• Visit historical sites for educational content</li>
-                    <li>
-                      • Use sitting areas for rest and wildlife observation
-                    </li>
-                    <li>• Respect wetland boundaries and wildlife habitats</li>
+                    <li>• Respect all conservation areas and wildlife habitats</li>
+                    <li>• Stay on designated trails</li>
                   </ul>
                 </div>
               </div>
             </CardContent>
           </Card>
           
-          {/* Visit Us Button and Directions Link - Moved outside the card */}
+          {/* Visit Us Button */}
           <div className="mt-8 text-center">
             <a 
               href="https://maps.app.goo.gl/hLf36RZKihctRw2f9"
@@ -540,5 +498,37 @@ const SiteMap = () => {
     </div>
   );
 };
+
+// Add custom CSS for the map
+const mapStyles = `
+  .leaflet-container {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .user-location-marker {
+    background: transparent;
+    border: none;
+  }
+  
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    font-family: inherit;
+  }
+  
+  .leaflet-popup-content {
+    margin: 12px;
+  }
+  
+  .leaflet-popup-tip {
+    background: white;
+  }
+`;
+
+// Add the styles to the document head
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = mapStyles;
+  document.head.appendChild(styleElement);
+}
 
 export default SiteMap;

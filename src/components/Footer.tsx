@@ -66,7 +66,14 @@ const Footer = () => {
                 <MapPin className="w-5 h-5 mt-0.5 mr-3 text-accent flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium text-primary-foreground/90">Location</p>
-                  <p className="text-sm text-primary-foreground/80">St. Margaret's Bay, Nova Scotia</p>
+                  <a
+                    href="https://maps.app.goo.gl/hTn4ejW2inuWHfeB8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary-foreground/80 hover:text-primary-foreground transition-colors"
+                  >
+                    St. Margaret's Bay, Nova Scotia
+                  </a>
                 </div>
               </div>
               <div className="flex items-start">

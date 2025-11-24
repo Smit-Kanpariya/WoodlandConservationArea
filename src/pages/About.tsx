@@ -4,16 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Leaf, 
-  TreePine, 
-  Globe, 
-  History, 
-  HeartHandshake, 
-  ChevronRight, 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  Leaf,
+  TreePine,
+  Globe,
+  History,
+  HeartHandshake,
+  ChevronRight,
+  MapPin,
+  Phone,
+  Mail,
   Check,
   Users,
   BookOpen,
@@ -68,12 +68,12 @@ const About = () => {
                 About <span className="text-primary">Woodland Conservation</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
-                The Woodland Conservation Site is dedicated to preserving and restoring the natural environment of 
-                St. Margaret's Bay, Nova Scotia. Our project aims to rewild the land, protect biodiversity, and 
+                The Woodland Conservation Site is dedicated to preserving and restoring the natural environment of
+                St. Margaret's Bay, Nova Scotia. Our project aims to rewild the land, protect biodiversity, and
                 educate visitors about sustainable living and eco-conscious practices.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <AudioButton 
+                <AudioButton
                   text="About Woodland Conservation. Preserving and restoring the natural environment of St. Margaret's Bay, Nova Scotia."
                   className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-full font-medium text-base transition-all duration-300"
                 />
@@ -81,10 +81,11 @@ const About = () => {
                   variant="outline"
                   className="gap-2 border-2 text-foreground hover:bg-primary/90 hover:text-primary-foreground hover:border-primary px-6 py-3 rounded-full font-medium text-base transition-all duration-300"
                   onClick={() => {
-                    const vh = Math.round((window.visualViewport?.height || window.innerHeight) * (window.innerWidth < 768 ? 0.75 : 0.9));
-                    const current = window.scrollY || window.pageYOffset;
-                    const next = Math.min(current + vh, document.documentElement.scrollHeight - vh);
-                    window.scrollTo({ top: next, behavior: 'smooth' });
+                    const isMobile = window.innerWidth < 768; // Standard breakpoint for mobile
+                    window.scrollTo({
+                      top: window.innerHeight * (isMobile ? 0.75 : 0.9),
+                      behavior: 'smooth'
+                    });
                   }}
                 >
                   <ChevronDown className="w-4 h-4" />
@@ -99,7 +100,7 @@ const About = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Mission */}
-        <motion.section 
+        <motion.section
           className="mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -114,7 +115,7 @@ const About = () => {
                 </div>
                 <CardTitle className="text-2xl font-bold">
                   Our Mission
-                  <AudioButton 
+                  <AudioButton
                     text="Our Mission. Our mission is to protect and enhance Nova Scotia's woodland ecosystems through education, restoration, and community engagement."
                     className="ml-3 inline-flex"
                   />
@@ -123,8 +124,8 @@ const About = () => {
             </CardHeader>
             <CardContent className="pt-6">
               <p className="text-lg text-foreground leading-relaxed">
-                Our mission is to protect and enhance Nova Scotia's woodland ecosystems through education, 
-                restoration, and community engagement. We believe in reconnecting people with nature while 
+                Our mission is to protect and enhance Nova Scotia's woodland ecosystems through education,
+                restoration, and community engagement. We believe in reconnecting people with nature while
                 ensuring the long-term health of the environment.
               </p>
             </CardContent>
@@ -132,7 +133,7 @@ const About = () => {
         </motion.section>
 
         {/* Project Background */}
-        <motion.section 
+        <motion.section
           className="mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -151,20 +152,20 @@ const About = () => {
               </Badge>
               <h2 className="text-3xl font-bold text-foreground mb-6">
                 Our Story
-                <AudioButton 
+                <AudioButton
                   text="Our Story. The Woodland Conservation project began as an initiative to restore previously disturbed land in St. Margaret's Bay."
                   className="ml-3 inline-flex"
                 />
               </h2>
               <div className="space-y-4 text-foreground">
                 <p className="leading-relaxed">
-                  The Woodland Conservation project began as an initiative to restore previously disturbed land in 
-                  St. Margaret's Bay. What started as a student-led conservation effort has grown into a 
+                  The Woodland Conservation project began as an initiative to restore previously disturbed land in
+                  St. Margaret's Bay. What started as a student-led conservation effort has grown into a
                   collaborative project involving local conservationists, community members, and volunteers.
                 </p>
                 <p className="leading-relaxed">
-                  The site's historical features, including the remains of an old farmhouse and original wells, 
-                  serve as a reminder of the land's agricultural past and its ongoing transformation into a 
+                  The site's historical features, including the remains of an old farmhouse and original wells,
+                  serve as a reminder of the land's agricultural past and its ongoing transformation into a
                   thriving natural habitat.
                 </p>
                 <ul className="space-y-2 mt-4">
@@ -181,8 +182,8 @@ const About = () => {
                 </ul>
               </div>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className="relative h-full min-h-[400px] rounded-2xl overflow-hidden bg-muted/30 border border-border/50"
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -207,7 +208,7 @@ const About = () => {
         </motion.section>
 
         {/* Our Philosophy & Values */}
-        <motion.section 
+        <motion.section
           className="mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -220,7 +221,7 @@ const About = () => {
             </Badge>
             <h2 className="text-3xl font-bold text-foreground mb-4">
               Our Philosophy & Values
-              <AudioButton 
+              <AudioButton
                 text="Our Philosophy and Values. We are guided by principles of sustainability, respect for nature, and community engagement."
                 className="ml-3 inline-flex"
               />
@@ -250,7 +251,7 @@ const About = () => {
                           <h3 className="text-xl font-semibold text-foreground no-break">
                             {value.title}
                           </h3>
-                          <AudioButton 
+                          <AudioButton
                             text={value.audioText}
                             className="ml-2 text-muted-foreground hover:text-foreground"
                           />
@@ -268,7 +269,7 @@ const About = () => {
         </motion.section>
 
         {/* Community Involvement */}
-        <motion.section 
+        <motion.section
           className="mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -282,12 +283,12 @@ const About = () => {
               </Badge>
               <h2 className="text-3xl font-bold text-foreground mb-6">
                 Join Our Community
-                <AudioButton 
+                <AudioButton
                   text="Join Our Community. We believe that conservation is a collective effort. Our community is at the heart of everything we do."
                   className="ml-3 inline-flex"
                 />
               </h2>
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -315,7 +316,7 @@ const About = () => {
                     </ul>
                   </div>
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
@@ -345,8 +346,8 @@ const About = () => {
                   </div>
                 </motion.div>
               </div>
-              
-              <motion.div 
+
+              <motion.div
                 className="text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
