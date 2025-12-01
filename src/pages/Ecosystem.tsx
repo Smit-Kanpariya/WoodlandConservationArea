@@ -76,7 +76,7 @@ const Ecosystem = () => {
       description: "Total area under active conservation",
     },
     {
-      value: "12",
+      value: "2",
       label: "Wetland Areas",
       description: "Individual wetland habitats preserved",
     },

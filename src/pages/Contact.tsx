@@ -6,6 +6,7 @@ import { MapPin, Phone, Mail, Clock, Send, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import AudioButton from "@/components/AudioButton";
 import { useToast } from "@/hooks/use-toast";
+import emailjs from '@emailjs/browser';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -25,6 +26,7 @@ const Contact = () => {
     subject: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const contactMethods = [
     {
@@ -72,14 +74,54 @@ const Contact = () => {
     "Media Inquiry",
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would submit to a backend service or Supabase
-    toast({
-      title: "Thank you for your message!",
-      description: "We'll respond to your inquiry within 24 hours.",
-    });
-    setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    setIsSubmitting(true);
+
+    // Initialize EmailJS with  public key
+    emailjs.init('YOUR_EMAILJS_PUBLIC_KEY');
+
+    try {
+      // Send the email using EmailJS
+      await emailjs.send(
+        'service_4x4duj4', // EmailJS service ID
+        'template_owew8nx', // EmailJS template ID
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          to_email: 'wecodeforfood25@gmail.com',
+          subject: formData.subject || 'New Contact Form Submission',
+          message: formData.message,
+          phone: formData.phone || 'Not provided'
+        },
+        'Z5R7CrPNBLeaMJKeP' // Public key
+      );
+
+      // Show success message
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. We'll get back to you soon!",
+        variant: "default"
+      });
+
+      // Reset form
+      setFormData({ 
+        name: "", 
+        email: "", 
+        phone: "", 
+        subject: "", 
+        message: "" 
+      });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (
@@ -319,10 +361,26 @@ const Contact = () => {
                 </div>
 
                 <div className="pt-2">
-                  <Button type="submit" className="w-full sm:w-auto">
-                    Send Message
-                    <Send className="ml-2 h-4 w-4" />
-                  </Button>
+                  <Button 
+                  type="submit" 
+                  className="w-full sm:w-auto"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                      <Send className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
                 </div>
 
                 <p className="text-xs text-muted-foreground">
