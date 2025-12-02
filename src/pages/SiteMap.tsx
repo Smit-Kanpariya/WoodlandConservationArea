@@ -14,10 +14,6 @@ declare module 'leaflet' {
     };
   }
 }
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Navigation, Home, Trees, Droplets, Clock, ChevronRight, Map as MapIcon } from "lucide-react";
-import { motion } from "framer-motion";
-import AudioButton from "@/components/AudioButton";
 
 // Utility functions for feature styling
 const getFeatureBackground = (featureType: string): string => {
@@ -50,11 +46,14 @@ const getFeatureTextColor = (featureType: string): string => {
   }
 };
 
-
 // Leaflet imports
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polygon, Polyline, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Badge } from "@/components/ui/badge";
+import { Navigation, MapPin } from "lucide-react";
+import { motion } from "framer-motion";
+import AudioButton from "@/components/AudioButton";
 
 // Fix for default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -66,56 +65,160 @@ L.Icon.Default.mergeOptions({
 
 // Map configuration
 const mapConfig = {
-  center: { lat: 44.623917, lng: -63.920472 },
-  zoom: 17,
+  center: { lat: 44.6225, lng: -63.920472 },
+  zoom: 16,
   areas: {
+    // Main site boundary
     siteBorder: [
-      [44.6267252, -63.9236383] as [number, number],
-      [44.6171265, -63.9075548] as [number, number],
-      [44.6159954, -63.9082112] as [number, number],
-      [44.6196995, -63.9140457] as [number, number],
-      [44.6203791, -63.9140672] as [number, number],
-      [44.6206197, -63.9151561] as [number, number],
-      [44.6205651, -63.9154160] as [number, number],
-      [44.6217831, -63.9173686] as [number, number],
-      [44.6219817, -63.9172345] as [number, number],
-      [44.6222223, -63.9178805] as [number, number],
-      [44.6246191, -63.9215955] as [number, number],
-      [44.6253524, -63.9228526] as [number, number],
-      [44.6266502, -63.9238271] as [number, number],
-      [44.6267252, -63.9236383] as [number, number]
+      [44.6267252, -63.9236383],
+      [44.6171265, -63.9075548],
+      [44.6159954, -63.9082112],
+      [44.6196995, -63.9140457],
+      [44.6203791, -63.9140672],
+      [44.6206197, -63.9151561],
+      [44.6205651, -63.9154160],
+      [44.6217831, -63.9173686],
+      [44.6219817, -63.9172345],
+      [44.6222223, -63.9178805],
+      [44.6246191, -63.9215955],
+      [44.6253524, -63.9228526],
+      [44.6266502, -63.9238271],
+      [44.6267252, -63.9236383]
     ],
-    rewildingArea: [
-      [44.6258752, -63.9221694] as [number, number],
-      [44.6253524, -63.9228526] as [number, number],
-      [44.6266502, -63.9238271] as [number, number],
-      [44.6267252, -63.9236383] as [number, number],
-      [44.6258752, -63.9221694] as [number, number]
-    ],
-    yellowBirchArea: [
-      [44.6247135, -63.9202481] as [number, number],
-      [44.6258752, -63.9221694] as [number, number],
-      [44.6253524, -63.9228526] as [number, number]
-    ]
+    // Rewilding area
+    rewildingArea: {
+      name: "Rewilding Area",
+      coordinates: [
+        [44.6258752, -63.9221694],
+        [44.6253524, -63.9228526],
+        [44.6266502, -63.9238271],
+        [44.6267252, -63.9236383],
+        [44.6258752, -63.9221694]
+      ]
+    },
+    // Yellow Birch area
+    yellowBirchArea: {
+      name: "Yellow Birch Area",
+      coordinates: [
+        [44.6247135, -63.9202481],
+        [44.6258752, -63.9221694],
+        [44.6253524, -63.9228526],
+        [44.6241917, -63.9209429],
+        [44.6247135, -63.9202481]
+      ]
+    },
+    // Wetland area
+    wetlandArea: {
+      name: "Wetland Area",
+      coordinates: [
+        [44.62068196265815, -63.91357210880862],
+        [44.62008115188539, -63.91359129291443],
+        [44.61978074416757, -63.91255535121347],
+        [44.61928916454943, -63.911903091624595],
+        [44.61864737378403, -63.91132756845727],
+        [44.61822406109886, -63.91100143866255],
+        [44.61844254545102, -63.91073286118473],
+        [44.61883854624347, -63.91080959760677],
+        [44.61898875273391, -63.9107136770789],
+        [44.61934378471241, -63.910963070451515],
+        [44.61928916454943, -63.91140430487937],
+        [44.6195895748107, -63.91182635520195],
+        [44.619767089234244, -63.911807171096726],
+        [44.61991729332294, -63.91151940951303],
+        [44.62012211645387, -63.911576961829894],
+        [44.62073658151087, -63.91341863596446],
+        [44.62072359289127, -63.91356349564225],
+        [44.62068196265815, -63.91357210880862]
+      ]
+    },
+    // Trail path (connecting points in order of the trail)
+    trailPath: {
+      name: "Nature Trail",
+      coordinates: [
+        [44.626562, -63.923460],   // trailhead
+        [44.626250, -63.923472],   // exercise bar
+        [44.626111, -63.922917],   // farmhouse
+        [44.626389, -63.923500],   // well1
+        [44.625833, -63.922611],   // sitting area
+        [44.625528, -63.922000],   // yellow-birch
+        [44.625139, -63.921167],   // telephone-2
+        [44.624167, -63.919556]    // labyrinth
+      ]
+    }
   },
-  features: [
+  // Points of Interest
+  pois: [
     {
       id: "trailhead",
       name: "Trailhead",
-      type: "access",
-      position: [44.6245, -63.9200],
+      type: "trailhead",
+      position: [44.626562, -63.923460],
       icon: '📍',
-      description: "Main entrance and parking area for conservation trails",
-      audioText: "Trailhead. Main entrance and parking area for conservation trails.",
+      description: "Start the 1 km trail here, right behind St. Paul's Church and beside the parking lot.",
+      audioSrc: "/audio/trailhead.mp3"
+    },
+    {
+      id: "exercise-bar",
+      name: "Exercise Bar",
+      type: "exercise",
+      position: [44.626250, -63.923472],
+      icon: '💪',
+      description: "Use this simple bar to stretch or try pull-ups before you head down the trail.",
+      audioSrc: null
     },
     {
       id: "farmhouse",
       name: "Farmhouse Foundation",
       type: "historical",
-      position: [44.6235, -63.9210],
+      position: [44.626111, -63.922917],
       icon: '🏠',
-      description: "Archaeological remains of the original 1800s farmhouse",
-      audioText: "Farmhouse Foundation. Archaeological remains of the original 1800s farmhouse.",
+      description: "These low stones mark the remains of a small forest cabin that once served a farm family.",
+      audioSrc: "/audio/farmhouse.mp3"
+    },
+    {
+      id: "well1",
+      name: "Old Historic Well",
+      type: "well",
+      position: [44.626389, -63.923500],
+      icon: '🚰',
+      description: "This old well gave water to church neighbors and the few families who lived nearby.",
+      audioSrc: "/audio/well1.mp3"
+    },
+    {
+      id: "sitting",
+      name: "Sitting Area",
+      type: "sitting",
+      position: [44.625833, -63.922611],
+      icon: '🪑',
+      description: "A quiet clearing to rest, listen to the wind, and take in the beauty of nature.",
+      audioSrc: "/audio/sitting.mp3"
+    },
+    {
+      id: "telephone-2",
+      name: "Second Telephone",
+      type: "telephone",
+      position: [44.625139, -63.921167],
+      icon: '📞',
+      description: "This gentle stop offers a wooden phone where visitors can speak to loved ones while feeling close to nature.",
+      audioSrc: null
+    },
+    {
+      id: "yellow-birch",
+      name: "Coastal Yellow Birch",
+      type: "ecosystem",
+      position: [44.625528, -63.922000],
+      icon: '🌳',
+      description: "From here the trail is full of bright yellow birch trees that are easy to spot because of their golden bark.",
+      audioSrc: "/audio/yellow-birch.mp3"
+    },
+    {
+      id: "labyrinth",
+      name: "Labyrinth",
+      type: "feature",
+      position: [44.624167, -63.919556],
+      icon: '🌀',
+      description: "A labyrinth is a winding path you follow to reach the center and find calm.",
+      audioSrc: "/audio/labyrinth.mp3"
     },
     {
       id: "yellow-birch",
@@ -147,6 +250,45 @@ const mapConfig = {
   ]
 };
 
+// Define types for our map configuration
+type MapArea = {
+  name: string;
+  coordinates: [number, number][];
+};
+
+interface AudioButtonProps {
+  text: string;
+  className?: string;
+  variant?: "default" | "outline" | "ghost";
+}
+
+interface POI {
+  id: string;
+  name: string;
+  type: string;
+  position: [number, number];
+  icon: string;
+  description: string;
+  audioSrc?: string | null;
+  audioText?: string;
+};
+
+type MapConfig = {
+  center: { lat: number; lng: number };
+  zoom: number;
+  areas: {
+    siteBorder: [number, number][];
+    rewildingArea: MapArea;
+    yellowBirchArea: MapArea;
+    wetlandArea: MapArea;
+    trailPath: MapArea;
+  };
+  pois: POI[];
+};
+
+// Cast our config to the proper type
+const typedMapConfig = mapConfig as unknown as MapConfig;
+
 // Component to handle map settings
 const MapSettings = () => {
   const map = useMap();
@@ -162,7 +304,7 @@ const MapSettings = () => {
     if (map.tap) map.tap.disable();
     
     // Set view to center
-    map.setView([mapConfig.center.lat, mapConfig.center.lng], mapConfig.zoom);
+    map.setView([typedMapConfig.center.lat, typedMapConfig.center.lng], typedMapConfig.zoom);
   }, [map]);
 
   return null;
@@ -190,6 +332,39 @@ const SiteMap = () => {
       alert("Geolocation is not supported by this browser.");
     }
   };
+
+  // Render area polygons with proper typing
+  const renderArea = (area: MapArea, color: string) => (
+    <Polygon
+      key={area.name}
+      positions={area.coordinates}
+      pathOptions={{
+        color: color,
+        weight: 2,
+        opacity: 1,
+        fillColor: color,
+        fillOpacity: 0.2
+      }}
+    >
+      <Tooltip sticky>{area.name}</Tooltip>
+    </Polygon>
+  );
+
+  // Render the trail path
+  const renderTrail = (trail: MapArea) => (
+    <Polyline
+      key="trail-path"
+      positions={trail.coordinates}
+      pathOptions={{
+        color: '#8B4513',
+        weight: 4,
+        opacity: 0.8,
+        dashArray: '10, 10'
+      }}
+    >
+      <Tooltip sticky>Nature Trail Path</Tooltip>
+    </Polyline>
+  );
 
   const getFeatureColor = (type: string) => {
     switch (type) {
@@ -264,11 +439,14 @@ const SiteMap = () => {
           <Card className="bg-muted/30">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                Map Legend
-                <AudioButton
-                  text="Map Legend. Different colored icons represent different types of features on our conservation site."
-                  className="ml-2"
-                />
+                Map
+                <div className="ml-2">
+                  <AudioButton 
+                    text="Map Legend. Different colored icons represent different types of features on our conservation site." 
+                    variant="ghost"
+                    className="p-2 h-auto"
+                  />
+                </div>
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center">
@@ -296,7 +474,7 @@ const SiteMap = () => {
         <section className="mb-12">
           <Card className="overflow-hidden">
             <CardContent className="p-0">
-              <div className="h-[500px] w-full relative">
+              <div className="h-[600px] w-full relative">
                 <MapContainer
                   center={[mapConfig.center.lat, mapConfig.center.lng]}
                   zoom={mapConfig.zoom}
@@ -316,49 +494,79 @@ const SiteMap = () => {
                   
                   {/* Site Border */}
                   <Polygon
-                    positions={mapConfig.areas.siteBorder}
+                    positions={typedMapConfig.areas.siteBorder}
                     pathOptions={{ 
-                      color: 'var(--primary)',
+                      color: '#000000',
+                      weight: 2,
+                      opacity: 1,
                       fillColor: 'var(--primary)',
-                      fillOpacity: 0.1,
-                      weight: 2
+                      fillOpacity: 0.1
                     }}
-                  />
+                  >
+                    <Tooltip sticky>Conservation Area Boundary</Tooltip>
+                  </Polygon>
                   
-                  {/* Rewilding Area */}
-                  <Polygon
-                    positions={mapConfig.areas.rewildingArea}
-                    pathOptions={{ 
-                      color: 'var(--accent)',
-                      fillColor: 'var(--accent)',
-                      fillOpacity: 0.2,
-                      weight: 2
-                    }}
-                  />
+                  {/* Render Areas */}
+                  {renderArea(typedMapConfig.areas.rewildingArea, '#4CAF50')}
+                  {renderArea(typedMapConfig.areas.yellowBirchArea, '#FFC107')}
+                  {renderArea(typedMapConfig.areas.wetlandArea, '#2196F3')}
                   
-                  {/* Yellow Birch Area */}
-                  <Polygon
-                    positions={mapConfig.areas.yellowBirchArea}
-                    pathOptions={{ 
-                      color: 'var(--secondary-foreground)',
-                      fillColor: 'var(--secondary-foreground)',
-                      fillOpacity: 0.2,
-                      weight: 2
-                    }}
-                  />
-
-                  {/* Feature Markers */}
-                  {mapConfig.features.map((feature) => (
+                  {/* Render Trail */}
+                  {renderTrail(typedMapConfig.areas.trailPath)}
+                  
+                  {/* POI Markers */}
+                  {typedMapConfig.pois.map((poi) => (
                     <Marker 
-                      key={feature.id} 
-                      position={feature.position as [number, number]}
-                      eventHandlers={{
-                        click: () => setSelectedFeature(feature.id)
-                      }}
+                      key={poi.id}
+                      position={poi.position}
+                      icon={L.divIcon({
+                        html: `<div style="font-size: 24px;">${poi.icon}</div>`,
+                        className: 'custom-icon',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                      })}
                     >
                       <Popup>
-                        <div className="font-medium">{feature.name}</div>
-                        <div className="text-sm text-muted-foreground">{feature.description}</div>
+                        <div className="text-center">
+                          <h3 className="font-bold">{poi.name}</h3>
+                          <p className="text-sm">{poi.description}</p>
+                          {poi.audioSrc && (
+                            <AudioButton 
+                              text={poi.audioText || poi.description} 
+                              className="mt-2"
+                            />
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  ))}
+
+                  {/* POI Markers with selection support */}
+                  {typedMapConfig.pois.map((poi) => (
+                    <Marker 
+                      key={poi.id}
+                      position={poi.position}
+                      eventHandlers={{
+                        click: () => setSelectedFeature(poi.id)
+                      }}
+                      icon={L.divIcon({
+                        html: `<div style="font-size: 24px;">${poi.icon}</div>`,
+                        className: 'custom-icon',
+                        iconSize: [24, 24],
+                        iconAnchor: [12, 12]
+                      })}
+                    >
+                      <Popup>
+                        <div className="text-center">
+                          <h3 className="font-bold">{poi.name}</h3>
+                          <p className="text-sm">{poi.description}</p>
+                          {poi.audioSrc && (
+                            <AudioButton 
+                              text={poi.audioText || poi.description} 
+                              className="mt-2"
+                            />
+                          )}
+                        </div>
                       </Popup>
                     </Marker>
                   ))}
@@ -384,30 +592,36 @@ const SiteMap = () => {
           </Card>
         </section>
 
-        {/* Selected Feature Details */}
+        {/* Selected POI Details */}
         {selectedFeature && (
           <section className="mb-12">
-            {mapConfig.features
-              .filter((feature) => feature.id === selectedFeature)
-              .map((feature) => (
-                <Card key={feature.id} className="event-card">
+            {typedMapConfig.pois
+              .filter((poi) => poi.id === selectedFeature)
+              .map((poi) => (
+                <Card key={poi.id} className="event-card">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center">
-                        <div className={`w-12 h-12 ${getFeatureBackground(feature.type.split(' ')[0])} rounded-full flex items-center justify-center border-2 ${getFeatureTextColor(feature.type.split(' ')[0])} text-xl`}>
-                          {feature.icon}
+                        <div className={`w-12 h-12 ${getFeatureBackground(poi.type)} rounded-full flex items-center justify-center border-2 ${getFeatureTextColor(poi.type)} text-xl`}>
+                          {poi.icon}
                         </div>
                         <div className="ml-4">
                           <h3 className="text-2xl font-bold text-foreground">
-                            {feature.name}
+                            {poi.name}
                           </h3>
                           <span className="text-sm text-muted-foreground capitalize">
-                            {feature.type}
+                            {poi.type}
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <AudioButton text={feature.audioText} />
+                        {poi.audioSrc && (
+                          <AudioButton 
+                            text={poi.audioText || poi.description}
+                            variant="outline"
+                            className="p-2 h-auto"
+                          />
+                        )}
                         <Button
                           variant="outline"
                           size="sm"
@@ -418,7 +632,7 @@ const SiteMap = () => {
                       </div>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
-                      {feature.description}
+                      {poi.description}
                     </p>
                   </CardContent>
                 </Card>
@@ -431,12 +645,14 @@ const SiteMap = () => {
           <Card className="bg-primary text-primary-foreground">
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold mb-6 flex items-center">
-                How to Use This Map
-                <AudioButton
-                  text="How to Use This Map. Click on any colored marker to learn more about that feature. Use the GPS button to find your current location. The map shows all major trails, historical sites, and conservation areas within our property boundaries."
-                  className="ml-4 bg-white/20 hover:bg-white/30"
-                  variant="ghost"
-                />
+                How to Use This
+                <div className="ml-4">
+                  <AudioButton 
+                    text="How to Use This Map. Click on any colored marker to learn more about that feature. Use the GPS button to find your current location. The map shows all major trails, historical sites, and conservation areas within our property boundaries." 
+                    variant="ghost"
+                    className="p-2 h-auto bg-white/20 hover:bg-white/30"
+                  />
+                </div>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
