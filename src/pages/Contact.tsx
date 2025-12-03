@@ -12,11 +12,10 @@ const Contact = () => {
   const { toast } = useToast();
   
   const scrollDown = () => {
-    const isMobile = window.innerWidth < 768;
-    const scrollMultiplier = isMobile ? 0.7 : 0.8; 
+    const scrollMultiplier = 0.8;
     window.scrollBy({
       top: window.innerHeight * scrollMultiplier,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   };
   const [formData, setFormData] = useState({

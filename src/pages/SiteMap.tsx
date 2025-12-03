@@ -54,6 +54,11 @@ import { Badge } from "@/components/ui/badge";
 import { Navigation, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import AudioButton from "@/components/AudioButton";
+import MapLegend from "@/components/map/MapLegend";
+import rawMap from "@/data/map.json";
+import { getPoiIcon } from "@/lib/mapIcons";
+import type { MapArea, MapConfig } from "@/types/map";
+import './SiteMap.css';
 
 // Fix for default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -63,231 +68,53 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-// Map configuration
-const mapConfig = {
-  center: { lat: 44.6225, lng: -63.920472 },
+// Build typed map config from JSON data
+
+const typedMapConfig: MapConfig = {
+  center: { lat: 44.6225, lng: -63.920472 }, // override to keep current view
   zoom: 16,
   areas: {
-    // Main site boundary
-    siteBorder: [
-      [44.6267252, -63.9236383],
-      [44.6171265, -63.9075548],
-      [44.6159954, -63.9082112],
-      [44.6196995, -63.9140457],
-      [44.6203791, -63.9140672],
-      [44.6206197, -63.9151561],
-      [44.6205651, -63.9154160],
-      [44.6217831, -63.9173686],
-      [44.6219817, -63.9172345],
-      [44.6222223, -63.9178805],
-      [44.6246191, -63.9215955],
-      [44.6253524, -63.9228526],
-      [44.6266502, -63.9238271],
-      [44.6267252, -63.9236383]
-    ],
-    // Rewilding area
+    siteBorder: rawMap.areas.siteBorder as [number, number][],
     rewildingArea: {
       name: "Rewilding Area",
-      coordinates: [
-        [44.6258752, -63.9221694],
-        [44.6253524, -63.9228526],
-        [44.6266502, -63.9238271],
-        [44.6267252, -63.9236383],
-        [44.6258752, -63.9221694]
-      ]
+      coordinates: rawMap.areas.rewildingArea as [number, number][],
     },
-    // Yellow Birch area
     yellowBirchArea: {
       name: "Yellow Birch Area",
-      coordinates: [
-        [44.6247135, -63.9202481],
-        [44.6258752, -63.9221694],
-        [44.6253524, -63.9228526],
-        [44.6241917, -63.9209429],
-        [44.6247135, -63.9202481]
-      ]
+      coordinates: rawMap.areas.yellowBirchArea as [number, number][],
     },
-    // Wetland area
     wetlandArea: {
       name: "Wetland Area",
-      coordinates: [
-        [44.62068196265815, -63.91357210880862],
-        [44.62008115188539, -63.91359129291443],
-        [44.61978074416757, -63.91255535121347],
-        [44.61928916454943, -63.911903091624595],
-        [44.61864737378403, -63.91132756845727],
-        [44.61822406109886, -63.91100143866255],
-        [44.61844254545102, -63.91073286118473],
-        [44.61883854624347, -63.91080959760677],
-        [44.61898875273391, -63.9107136770789],
-        [44.61934378471241, -63.910963070451515],
-        [44.61928916454943, -63.91140430487937],
-        [44.6195895748107, -63.91182635520195],
-        [44.619767089234244, -63.911807171096726],
-        [44.61991729332294, -63.91151940951303],
-        [44.62012211645387, -63.911576961829894],
-        [44.62073658151087, -63.91341863596446],
-        [44.62072359289127, -63.91356349564225],
-        [44.62068196265815, -63.91357210880862]
-      ]
+      coordinates: rawMap.areas.wetlandArea as [number, number][],
     },
-    // Trail path (connecting points in order of the trail)
     trailPath: {
       name: "Nature Trail",
       coordinates: [
-        [44.626562, -63.923460],   // trailhead
-        [44.626250, -63.923472],   // exercise bar
-        [44.626111, -63.922917],   // farmhouse
-        [44.626389, -63.923500],   // well1
-        [44.625833, -63.922611],   // sitting area
-        [44.625528, -63.922000],   // yellow-birch
-        [44.625139, -63.921167],   // telephone-2
-        [44.624167, -63.919556]    // labyrinth
+        [44.626562, -63.923460],
+        [44.626250, -63.923472],
+        [44.626111, -63.922917],
+        [44.626389, -63.923500],
+        [44.625833, -63.922611],
+        [44.625528, -63.922000],
+        [44.625139, -63.921167],
+        [44.624167, -63.919556]
       ]
-    }
+    },
   },
-  // Points of Interest
-  pois: [
-    {
-      id: "trailhead",
-      name: "Trailhead",
-      type: "trailhead",
-      position: [44.626562, -63.923460],
-      icon: '📍',
-      description: "Start the 1 km trail here, right behind St. Paul's Church and beside the parking lot.",
-      audioSrc: "/audio/trailhead.mp3"
-    },
-    {
-      id: "exercise-bar",
-      name: "Exercise Bar",
-      type: "exercise",
-      position: [44.626250, -63.923472],
-      icon: '💪',
-      description: "Use this simple bar to stretch or try pull-ups before you head down the trail.",
-      audioSrc: null
-    },
-    {
-      id: "farmhouse",
-      name: "Farmhouse Foundation",
-      type: "historical",
-      position: [44.626111, -63.922917],
-      icon: '🏠',
-      description: "These low stones mark the remains of a small forest cabin that once served a farm family.",
-      audioSrc: "/audio/farmhouse.mp3"
-    },
-    {
-      id: "well1",
-      name: "Old Historic Well",
-      type: "well",
-      position: [44.626389, -63.923500],
-      icon: '🚰',
-      description: "This old well gave water to church neighbors and the few families who lived nearby.",
-      audioSrc: "/audio/well1.mp3"
-    },
-    {
-      id: "sitting",
-      name: "Sitting Area",
-      type: "sitting",
-      position: [44.625833, -63.922611],
-      icon: '🪑',
-      description: "A quiet clearing to rest, listen to the wind, and take in the beauty of nature.",
-      audioSrc: "/audio/sitting.mp3"
-    },
-    {
-      id: "telephone-2",
-      name: "Second Telephone",
-      type: "telephone",
-      position: [44.625139, -63.921167],
-      icon: '📞',
-      description: "This gentle stop offers a wooden phone where visitors can speak to loved ones while feeling close to nature.",
-      audioSrc: null
-    },
-    {
-      id: "yellow-birch",
-      name: "Coastal Yellow Birch",
-      type: "ecosystem",
-      position: [44.625528, -63.922000],
-      icon: '🌳',
-      description: "From here the trail is full of bright yellow birch trees that are easy to spot because of their golden bark.",
-      audioSrc: "/audio/yellow-birch.mp3"
-    },
-    {
-      id: "labyrinth",
-      name: "Labyrinth",
-      type: "feature",
-      position: [44.624167, -63.919556],
-      icon: '🌀',
-      description: "A labyrinth is a winding path you follow to reach the center and find calm.",
-      audioSrc: "/audio/labyrinth.mp3"
-    },
-    {
-      id: "yellow-birch",
-      name: "Yellow Birch Grove",
-      type: "ecosystem",
-      position: [44.6225, -63.9195],
-      icon: '🌳',
-      description: "Ancient yellow birch trees, some over 200 years old",
-      audioText: "Yellow Birch Grove. Ancient yellow birch trees, some over 200 years old.",
-    },
-    {
-      id: "wetland1",
-      name: "Primary Wetland",
-      type: "ecosystem",
-      position: [44.6220, -63.9220],
-      icon: '💧',
-      description: "Main wetland area supporting diverse wildlife",
-      audioText: "Primary Wetland. Main wetland area supporting diverse wildlife.",
-    },
-    {
-      id: "sitting-area",
-      name: "Sitting Area",
-      type: "amenity",
-      position: [44.6240, -63.9210],
-      icon: '🪑',
-      description: "Peaceful rest area with benches",
-      audioText: "Sitting Area. Peaceful rest area with benches.",
-    },
-  ]
+  pois: (rawMap.pois || []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    type: p.type,
+    position: [p.lat, p.lng] as [number, number],
+    icon: getPoiIcon(p.type),
+    description: p.clickText || p.hoverText || p.name,
+    audioSrc: p.audioSrc ?? null,
+  }))
 };
 
 // Define types for our map configuration
-type MapArea = {
-  name: string;
-  coordinates: [number, number][];
-};
 
-interface AudioButtonProps {
-  text: string;
-  className?: string;
-  variant?: "default" | "outline" | "ghost";
-}
-
-interface POI {
-  id: string;
-  name: string;
-  type: string;
-  position: [number, number];
-  icon: string;
-  description: string;
-  audioSrc?: string | null;
-  audioText?: string;
-};
-
-type MapConfig = {
-  center: { lat: number; lng: number };
-  zoom: number;
-  areas: {
-    siteBorder: [number, number][];
-    rewildingArea: MapArea;
-    yellowBirchArea: MapArea;
-    wetlandArea: MapArea;
-    trailPath: MapArea;
-  };
-  pois: POI[];
-};
-
-// Cast our config to the proper type
-const typedMapConfig = mapConfig as unknown as MapConfig;
+// Config sourced from src/data/map.json and adapted to MapConfig
 
 // Component to handle map settings
 const MapSettings = () => {
@@ -436,38 +263,7 @@ const SiteMap = () => {
 
         {/* Map Legend */}
         <section className="mb-8">
-          <Card className="bg-muted/30">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
-                Map
-                <div className="ml-2">
-                  <AudioButton 
-                    text="Map Legend. Different colored icons represent different types of features on our conservation site." 
-                    variant="ghost"
-                    className="p-2 h-auto"
-                  />
-                </div>
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-accent/20 rounded-full border border-accent/70 mr-2"></div>
-                  <span className="text-sm text-foreground">Access Points</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-primary/20 rounded-full border border-primary/70 mr-2"></div>
-                  <span className="text-sm text-foreground">Ecosystems</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-destructive/20 rounded-full border border-destructive/70 mr-2"></div>
-                  <span className="text-sm text-foreground">Historical Sites</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-secondary/20 rounded-full border border-secondary/70 mr-2"></div>
-                  <span className="text-sm text-foreground">Amenities</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <MapLegend />
         </section>
 
         {/* Interactive Map */}
@@ -476,8 +272,8 @@ const SiteMap = () => {
             <CardContent className="p-0">
               <div className="h-[600px] w-full relative">
                 <MapContainer
-                  center={[mapConfig.center.lat, mapConfig.center.lng]}
-                  zoom={mapConfig.zoom}
+                  center={[typedMapConfig.center.lat, typedMapConfig.center.lng]}
+                  zoom={typedMapConfig.zoom}
                   zoomControl={false}
                   scrollWheelZoom={false}
                   dragging={false}
@@ -514,33 +310,6 @@ const SiteMap = () => {
                   {/* Render Trail */}
                   {renderTrail(typedMapConfig.areas.trailPath)}
                   
-                  {/* POI Markers */}
-                  {typedMapConfig.pois.map((poi) => (
-                    <Marker 
-                      key={poi.id}
-                      position={poi.position}
-                      icon={L.divIcon({
-                        html: `<div style="font-size: 24px;">${poi.icon}</div>`,
-                        className: 'custom-icon',
-                        iconSize: [24, 24],
-                        iconAnchor: [12, 12]
-                      })}
-                    >
-                      <Popup>
-                        <div className="text-center">
-                          <h3 className="font-bold">{poi.name}</h3>
-                          <p className="text-sm">{poi.description}</p>
-                          {poi.audioSrc && (
-                            <AudioButton 
-                              text={poi.audioText || poi.description} 
-                              className="mt-2"
-                            />
-                          )}
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-
                   {/* POI Markers with selection support */}
                   {typedMapConfig.pois.map((poi) => (
                     <Marker 
@@ -702,37 +471,5 @@ const SiteMap = () => {
     </div>
   );
 };
-
-// Add custom CSS for the map
-const mapStyles = `
-  .leaflet-container {
-    background-color: rgba(255, 255, 255, 0.8);
-  }
-  
-  .user-location-marker {
-    background: transparent;
-    border: none;
-  }
-  
-  .leaflet-popup-content-wrapper {
-    border-radius: 8px;
-    font-family: inherit;
-  }
-  
-  .leaflet-popup-content {
-    margin: 12px;
-  }
-  
-  .leaflet-popup-tip {
-    background: white;
-  }
-`;
-
-// Add the styles to the document head
-if (typeof document !== 'undefined') {
-  const styleElement = document.createElement('style');
-  styleElement.textContent = mapStyles;
-  document.head.appendChild(styleElement);
-}
 
 export default SiteMap;

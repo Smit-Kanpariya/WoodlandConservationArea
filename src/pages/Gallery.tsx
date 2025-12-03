@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Trash2,
   Maximize2,
 } from "lucide-react";
 import AudioButton from "@/components/AudioButton";
@@ -34,14 +35,20 @@ interface Photo {
   caption: string | null;
   uploaded_by: string | null;
   created_at: string;
+  uploaderFirstName?: string | null;
+  uploaderLastName?: string | null;
 }
 
 const PhotoCard = ({
   photo,
   onPreview,
+  canDelete,
+  onDelete,
 }: {
   photo: Photo;
   onPreview: (photo: Photo) => void;
+  canDelete?: boolean;
+  onDelete?: (photo: Photo) => void;
 }) => {
   // Don't render if we don't have a photo
   if (!photo?.id) return null;
@@ -110,6 +117,21 @@ const PhotoCard = ({
             )}
           </div>
           <div className="flex gap-2">
+            {canDelete && onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="bg-red-500/70 hover:bg-red-600 text-white backdrop-blur-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(photo);
+                }}
+                title="Delete photo"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -381,11 +403,30 @@ const Gallery = () => {
   const [visibleCount, setVisibleCount] = useState(0);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const PHOTOS_PER_PAGE = 0; // Will be set in useEffect
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const isOwner = user?.email === "wecodeforfood25@gmail.com";
 
   // Scroll to top on component mount
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  // Show a one-time admin login message when the owner logs in
+  useEffect(() => {
+    if (!user) return;
+
+    const isOwnerUser = user.email === "wecodeforfood25@gmail.com";
+    const alreadyShown = sessionStorage.getItem("adminWelcomeShown");
+
+    if (isOwnerUser && !alreadyShown) {
+      toast({
+        title: "Admin logged in",
+        description: "You are logged in with the owner account.",
+      });
+      sessionStorage.setItem("adminWelcomeShown", "true");
+    }
+  }, [user, toast]);
 
   useEffect(() => {
     // Set initial visible count based on screen size
@@ -415,11 +456,75 @@ const Gallery = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setPhotos(data || []);
+
+      const photosData = (data || []) as Photo[];
+
+      // Collect unique uploader IDs so we can fetch their names from profiles
+      const uploaderIds = Array.from(
+        new Set(
+          photosData
+            .map((p) => p.uploaded_by)
+            .filter((id): id is string => Boolean(id))
+        )
+      );
+
+      let profilesById: Record<string, { first_name: string | null; last_name: string | null }> = {};
+
+      if (uploaderIds.length > 0) {
+        const { data: profiles, error: profilesError } = await (supabase
+          .from as any)("profiles")
+          .select("id, first_name, last_name")
+          .in("id", uploaderIds);
+
+        if (profilesError) {
+          console.error("Error fetching uploader profiles:", profilesError);
+        } else if (profiles) {
+          profilesById = profiles.reduce(
+            (acc, profile: any) => {
+              acc[profile.id] = {
+                first_name: profile.first_name ?? null,
+                last_name: profile.last_name ?? null,
+              };
+              return acc;
+            },
+            {} as Record<string, { first_name: string | null; last_name: string | null }>
+          );
+        }
+      }
+
+      const photosWithNames: Photo[] = photosData.map((photo) => {
+        const profile = photo.uploaded_by ? profilesById[photo.uploaded_by] : undefined;
+        return {
+          ...photo,
+          uploaderFirstName: profile?.first_name ?? null,
+          uploaderLastName: profile?.last_name ?? null,
+        };
+      });
+
+      setPhotos(photosWithNames);
     } catch (error) {
       console.error("Error fetching photos:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photo: Photo) => {
+    try {
+      const { error } = await supabase
+        .from("photos")
+        .delete()
+        .eq("id", photo.id);
+
+      if (error) {
+        console.error("Error deleting photo:", error);
+        return;
+      }
+
+      // Refresh photos after successful delete
+      await fetchPhotos();
+    } catch (err) {
+      console.error("Unexpected error deleting photo:", err);
     }
   };
 
@@ -637,6 +742,10 @@ const Gallery = () => {
                       key={photo.id}
                       photo={photo}
                       onPreview={setSelectedPhoto}
+                      canDelete={
+                        isOwner || (user?.id !== undefined && user.id === photo.uploaded_by)
+                      }
+                      onDelete={handleDeletePhoto}
                     />
                   ))}
                 </AnimatePresence>
@@ -723,11 +832,21 @@ const Gallery = () => {
                 alt={selectedPhoto.caption || "Full size preview"}
                 className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
               />
-              {selectedPhoto.caption && (
-                <div className="mt-4 text-center">
-                  <p className="text-white text-lg font-medium">
-                    {selectedPhoto.caption}
-                  </p>
+              {(selectedPhoto.caption || selectedPhoto.uploaderFirstName || selectedPhoto.uploaderLastName) && (
+                <div className="mt-4 text-center space-y-1">
+                  {selectedPhoto.caption && (
+                    <p className="text-white text-lg font-medium">
+                      {selectedPhoto.caption}
+                    </p>
+                  )}
+                  {(selectedPhoto.uploaderFirstName || selectedPhoto.uploaderLastName) && (
+                    <p className="text-sm text-white/80">
+                      Uploaded by {""}
+                      {[selectedPhoto.uploaderFirstName, selectedPhoto.uploaderLastName]
+                        .filter(Boolean)
+                        .join(" ")}
+                    </p>
+                  )}
                 </div>
               )}
             </motion.div>

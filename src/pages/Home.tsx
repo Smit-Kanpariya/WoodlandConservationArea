@@ -21,7 +21,7 @@ const Home = () => {
     },
     {
       icon: Droplets,
-      value: "12",
+      value: "2",
       label: "Wetland Areas",
       description: "Critical wetland habitats preserved",
     },

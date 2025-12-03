@@ -1,0 +1,22 @@
+/* Map styles extracted from inline styles */
+.leaflet-container {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.user-location-marker {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+}
+
+.leaflet-popup-tip {
+  background: white;
+}

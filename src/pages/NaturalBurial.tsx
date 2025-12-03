@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -19,15 +19,12 @@ import {
   Shield,
   ChevronRight,
   Check,
-  Send,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import AudioButton from "@/components/AudioButton";
-import { useToast } from "@/hooks/use-toast";
 
 const NaturalBurial = () => {
-  const { toast } = useToast();
   const scrollTargetRef = useRef<HTMLDivElement>(null);
 
   const scrollToOptions = () => {
@@ -39,45 +36,7 @@ const NaturalBurial = () => {
       });
     }
   };
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    interest: "",
-    message: "",
-    newsletter: false,
-  });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, this would submit to a backend service or Supabase
-    toast({
-      title: "Thank you for your inquiry!",
-      description:
-        "We'll respond to your message about natural burial options within 24 hours.",
-    });
-    setFormData({
-      name: "",
-      email: "",
-      interest: "",
-      message: "",
-      newsletter: false,
-    });
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const value =
-      e.target.type === "checkbox"
-        ? (e.target as HTMLInputElement).checked
-        : e.target.value;
-    setFormData({
-      ...formData,
-      [e.target.name]: value,
-    });
-  };
   const markerOptions = [
     {
       name: "Native Stone Marker",
@@ -763,149 +722,6 @@ const NaturalBurial = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Contact Form */}
-        <motion.section
-          className="mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-8">
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-foreground mb-4">
-                  Request More Information
-                </h2>
-                <p className="text-muted-foreground">
-                  Contact us to learn more about natural burial options and to
-                  schedule a visit to our conservation burial ground.
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="block text-sm font-medium text-foreground mb-1.5"
-                    >
-                      Full Name <span className="text-destructive">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
-                      placeholder="Your name"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-foreground mb-1.5"
-                    >
-                      Email Address <span className="text-destructive">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
-                      placeholder="your.email@example.com"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="interest"
-                    className="block text-sm font-medium text-foreground mb-1.5"
-                  >
-                    I'm interested in:
-                  </label>
-                  <select
-                    id="interest"
-                    name="interest"
-                    value={formData.interest}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
-                  >
-                    <option value="">Select an option</option>
-                    <option value="natural-burial">
-                      Natural Burial Information
-                    </option>
-                    <option value="family-plot">Family Plot Information</option>
-                    <option value="pre-planning">Pre-Planning Services</option>
-                    <option value="visit">Schedule a Visit</option>
-                    <option value="other">Other Inquiry</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="message"
-                    className="block text-sm font-medium text-foreground mb-1.5"
-                  >
-                    Your Message <span className="text-destructive">*</span>
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    rows={4}
-                    required
-                    className="w-full px-4 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-primary/50 focus:border-primary/50 focus:outline-none transition-colors"
-                    placeholder="Please share any questions or specific information you're looking for..."
-                  ></textarea>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="newsletter"
-                      name="newsletter"
-                      type="checkbox"
-                      checked={formData.newsletter}
-                      onChange={handleInputChange}
-                      className="h-4 w-4 rounded border-input text-primary focus:ring-primary/50"
-                    />
-                  </div>
-                  <div className="ml-3 text-sm">
-                    <label
-                      htmlFor="newsletter"
-                      className="text-muted-foreground"
-                    >
-                      Sign up for our newsletter to receive updates about our
-                      conservation efforts and natural burial information.
-                    </label>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Button type="submit" className="w-full sm:w-auto">
-                    Send Message
-                    <Send className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  We respect your privacy. Your information will only be used to
-                  respond to your inquiry and provide the requested information.
-                </p>
-              </form>
             </div>
           </div>
         </motion.section>
