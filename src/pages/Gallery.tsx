@@ -39,6 +39,12 @@ interface Photo {
   uploaderLastName?: string | null;
 }
 
+interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+}
+
 const PhotoCard = ({
   photo,
   onPreview,
@@ -471,8 +477,8 @@ const Gallery = () => {
       let profilesById: Record<string, { first_name: string | null; last_name: string | null }> = {};
 
       if (uploaderIds.length > 0) {
-        const { data: profiles, error: profilesError } = await (supabase
-          .from as any)("profiles")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: profiles, error: profilesError } = await (supabase.from as any)("profiles")
           .select("id, first_name, last_name")
           .in("id", uploaderIds);
 
@@ -480,7 +486,7 @@ const Gallery = () => {
           console.error("Error fetching uploader profiles:", profilesError);
         } else if (profiles) {
           profilesById = profiles.reduce(
-            (acc, profile: any) => {
+            (acc: Record<string, { first_name: string | null; last_name: string | null }>, profile: Profile) => {
               acc[profile.id] = {
                 first_name: profile.first_name ?? null,
                 last_name: profile.last_name ?? null,

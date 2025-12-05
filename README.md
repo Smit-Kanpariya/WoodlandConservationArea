@@ -1,121 +1,176 @@
-# Woodland Conservation Foundation
+# Woodland Conservation Area Project
 
-> A platform for preserving and showcasing the natural beauty of woodland areas
+> A modern web platform for preserving and showcasing the natural beauty of woodland areas, built for the Woodland Conservation Foundation.
 
-## Overview
+## 👋 To Future Students & Developers
 
-Woodland Conservation Foundation is dedicated to preserving and protecting natural woodland areas for future generations. This app presents a clean, modern site showcasing trails, points of interest, and conservation zones.
+Welcome! This project has been set up as a robust foundation for the Woodland Conservation Area platform. It is designed to be scalable, maintainable, and easy to extend.
 
-## Tech Stack
+**Your Mission:**
+You are tasked with continuing the development of this application. The core infrastructure, design system, and testing framework are already in place. You will likely be adding new features, refining the UI, or integrating backend services.
 
-- Vite + React + TypeScript
-- Tailwind CSS + shadcn/ui
-- Leaflet + React Leaflet
-- Cypress (E2E)
-- Supabase (integrations ready)
+**Current State:**
+- **Frontend:** Complete React + Vite setup with TypeScript.
+- **Styling:** Tailwind CSS with shadcn/ui components for a premium look.
+- **Maps:** Interactive maps using Leaflet.
+- **Testing:** Comprehensive End-to-End (E2E) testing setup with Cypress.
+- **Backend Integration:** Supabase client is configured (requires your own Supabase project credentials if you plan to use it).
 
-## Getting Started
+---
 
-### Prerequisites
+## 🛠️ Prerequisites
 
-- Node.js 18+ and npm
+Before you begin, ensure you have the following installed on your computer:
 
-### Installation
+1.  **Node.js** (Version 18 or higher)
+    *   [Download Node.js](https://nodejs.org/)
+    *   Verify installation: `node -v`
+2.  **npm** (Node Package Manager - comes with Node.js)
+    *   Verify installation: `npm -v`
+3.  **Git** (Version control)
+    *   [Download Git](https://git-scm.com/)
 
-1. Clone the repository
-   ```sh
-   git clone <YOUR_GIT_URL>
-   cd WoodlandConservationArea
-   ```
+---
 
-2. Install dependencies
-   ```sh
-   npm install
-   ```
+## 🚀 Installation Guide
 
-3. Start the development server
-   ```sh
-   npm run dev
-   ```
-   Vite will start on http://localhost:8080
+Follow these steps to get the project running on your local machine:
 
-## Scripts
-
-- `npm run dev` — Start development server
-- `npm run build` — Build for production
-- `npm run build:dev` — Development-mode build
-- `npm run preview` — Preview the production build
-- `npm run lint` — Lint the project
-
-## Project Structure
-
+### 1. Clone the Repository
+Open your terminal (Command Prompt, PowerShell, or Terminal) and run:
+```bash
+git clone <YOUR_REPOSITORY_URL>
 ```
-├─ public/
-├─ server/
-├─ src/
-│  ├─ assets/
-│  ├─ components/
-│  │  ├─ map/
-│  │  │  └─ MapLegend.tsx
-│  │  └─ ui/          # shadcn/ui components
-│  ├─ data/
-│  │  └─ map.json     # source of truth for map data (center, areas, POIs)
-│  ├─ lib/
-│  │  └─ mapIcons.ts  # icon mapping helpers
-│  ├─ pages/
-│  │  ├─ SiteMap.tsx  # renders the map using typed config from JSON
-│  │  └─ SiteMap.css  # map-specific styles
-│  ├─ types/
-│  │  └─ map.ts       # shared types (MapArea, POI, MapConfig)
-│  └─ ...
-├─ cypress/
-├─ vite.config.ts
-├─ tsconfig*.json
-└─ package.json
+*Replace `<YOUR_REPOSITORY_URL>` with the actual URL of this git repo.*
+
+### 2. Navigate to the Project Directory
+```bash
+cd WoodlandConservationArea
 ```
 
-## Map Architecture
+### 3. Install Dependencies
+This command downloads and installs all the required libraries listed in `package.json` (React, Tailwind, Cypress, etc.):
+```bash
+npm install
+```
+*Note: This might take a few minutes depending on your internet connection.*
 
-- Data: `src/data/map.json`
-  - Contains `center`, `areas` (site boundary, zones), and `pois`.
-- Types: `src/types/map.ts`
-  - `MapArea`, `POI`, `MapConfig` shared across the app.
-- Map UI: `src/pages/SiteMap.tsx`
-  - Builds `typedMapConfig` from `map.json` and renders polygons, trail, and POIs.
-- Legend: `src/components/map/MapLegend.tsx`
-  - Clean, minimal legend component used on the Site Map page.
-- Styles: `src/pages/SiteMap.css`
-  - Extracted Leaflet/map-related styles.
+---
 
-## Configuration
+## 💻 Running the Application
 
-- Vite alias: `@` → `./src` (see `vite.config.ts`).
-- TypeScript: `resolveJsonModule: true` to import `map.json` directly.
-- Dev server: host `::`, port `8080`.
+### Start Development Server
+To work on the project, start the local development server:
+```bash
+npm run dev
+```
+*   The app will be available at: **http://localhost:8080**
+*   The server supports "Hot Module Replacement" (HMR), so changes you make to the code will instantly appear in the browser.
 
-## Testing
-
-- Cypress E2E scaffold present under `cypress/`.
-- Run Cypress (examples):
-  ```sh
-  npx cypress open
-  # or
-  npx cypress run
-  ```
-
-## Build & Preview
-
-```sh
+### Build for Production
+To create an optimized build for deployment:
+```bash
 npm run build
+```
+*   The output will be in the `dist/` folder.
+
+### Preview Production Build
+To test the production build locally:
+```bash
 npm run preview
 ```
-Build output is emitted to `dist/`.
 
-## Contributing
+---
 
-- Keep map data in `src/data/map.json` only (the root `map.json` has been removed).
-- Add new types in `src/types/` and reuse across components.
-- Prefer modular components under `src/components/` (e.g., `components/map/*`).
-- Use shadcn/ui and Tailwind for consistent styling.
+## 🧪 Testing with Cypress
 
+This project uses **Cypress** for End-to-End (E2E) testing. This ensures that critical flows (like navigation, login, forms) work as expected.
 
+### Option A: Interactive Mode (Recommended for Development)
+This opens the Cypress Test Runner, where you can see tests run in real-time.
+```bash
+npm run cypress:open
+```
+1.  Select **E2E Testing**.
+2.  Choose a browser (e.g., Chrome).
+3.  Click on a test file (e.g., `01-home.cy.ts`) to run it.
+
+### Option B: Headless Mode (For CI/CD or Quick Checks)
+Runs all tests in the command line without opening a browser window.
+```bash
+npm run cypress:run
+```
+
+### Test Files Location
+All test files are located in: `cypress/e2e/`
+*   `01-home.cy.ts`: Tests the home page.
+*   `03-ecosystem.cy.ts`: Tests the ecosystem page.
+*   `05-species.cy.ts`: Tests the species page.
+*   `10-login.cy.ts`: Tests the login functionality.
+*   `11-navigation.cy.ts`: Tests site-wide navigation.
+*   `12-accessibility.cy.ts`: Checks for basic accessibility compliance.
+
+---
+
+## 📂 Project Structure
+
+Here is a quick overview of the important folders:
+
+```
+WoodlandConservationArea/
+├── src/
+│   ├── components/      # Reusable UI components (Buttons, Nav, Footer)
+│   │   ├── ui/          # shadcn/ui library components
+│   │   └── map/         # Map-related components
+│   ├── pages/           # Main page components (Home, About, Contact)
+│   ├── data/            # Static data files (e.g., map.json)
+│   ├── hooks/           # Custom React hooks (e.g., useAuth)
+│   ├── lib/             # Utility functions and helpers
+│   └── types/           # TypeScript type definitions
+├── cypress/
+│   ├── e2e/             # Test files (*.cy.ts)
+│   └── support/         # Cypress support files and custom commands
+├── public/              # Static assets (images, logos)
+└── package.json         # Project configuration and dependencies
+```
+
+---
+
+## 📦 Key Technologies & Packages
+
+This project relies on the following major technologies. You don't need to install these individually; `npm install` handles them all.
+
+*   **Framework:** [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+*   **Language:** [TypeScript](https://www.typescriptlang.org/)
+*   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+*   **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (built on Radix UI)
+*   **Maps:** [Leaflet](https://leafletjs.com/) + [React Leaflet](https://react-leaflet.js.org/)
+*   **Icons:** [Lucide React](https://lucide.dev/)
+*   **Testing:** [Cypress](https://www.cypress.io/)
+*   **Backend/Auth:** [Supabase](https://supabase.com/) (Client installed)
+*   **State Management:** [TanStack Query](https://tanstack.com/query/latest)
+
+---
+
+## ❓ Troubleshooting
+
+**"Cannot find name 'describe' or 'it'" in Cypress files:**
+*   This is a TypeScript editor issue.
+*   **Fix:** Open `cypress/tsconfig.json` (it is already configured correctly) and restart your IDE's TypeScript server.
+*   VS Code: `Ctrl+Shift+P` -> "TypeScript: Restart TS Server".
+
+**Map not loading:**
+*   Ensure `src/data/map.json` exists and is valid JSON.
+*   Check if the Leaflet CSS is imported in `index.html` or `main.tsx`.
+
+**Login not working:**
+*   The project is set up for Supabase Auth. You need to provide valid Supabase credentials in a `.env` file if you want to connect to a real backend.
+*   Example `.env` file:
+    ```
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    ```
+
+---
+
+*Documentation updated on December 4, 2025*

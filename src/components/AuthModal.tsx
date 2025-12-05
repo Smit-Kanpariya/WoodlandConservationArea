@@ -18,7 +18,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, error: authError, refreshSession } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent, isSignUp: boolean) => {
@@ -35,14 +35,14 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setIsLoading(true);
 
     try {
-      const { error } = isSignUp 
+      const { error } = isSignUp
         ? await signUp(email, password)
         : await signIn(email, password);
 
       if (error) {
         // Specific error handling
         let errorMessage = error.message;
-        
+
         if (error.message.includes('Invalid login credentials')) {
           errorMessage = "Invalid email or password. Please try again.";
         } else if (error.message.includes('Email not confirmed')) {
@@ -50,7 +50,7 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
         } else if (error.message.includes('User already registered')) {
           errorMessage = "This email is already registered. Please sign in instead.";
         }
-        
+
         toast({
           title: "Authentication Error",
           description: errorMessage,
@@ -59,11 +59,11 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       } else {
         toast({
           title: isSignUp ? "Account Created" : "Welcome Back",
-          description: isSignUp 
+          description: isSignUp
             ? "Please check your email to verify your account."
             : "You have been successfully signed in.",
         });
-        
+
         // Reset form and close modal on success
         setEmail('');
         setPassword('');
@@ -87,7 +87,6 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setPassword('');
     setIsLoading(false);
     // Clear any potential errors from auth context
-    const { error: authError, refreshSession } = useAuth();
     if (authError) {
       refreshSession().catch(console.error);
     }
@@ -141,9 +140,9 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   required
                 />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading || !email || !password}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -177,9 +176,9 @@ const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                   minLength={6}
                 />
               </div>
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={isLoading || !email || !password}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

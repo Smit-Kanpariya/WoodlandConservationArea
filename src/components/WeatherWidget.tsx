@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { 
-  Cloud, 
-  CloudRain, 
-  CloudSnow, 
-  CloudSun, 
-  Droplets, 
-  Sun, 
-  CloudLightning, 
-  CloudFog, 
+import {
+  Cloud,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Droplets,
+  Sun,
+  CloudLightning,
+  CloudFog,
   Wind,
   Gauge
 } from 'lucide-react';
@@ -24,15 +24,14 @@ interface WeatherData {
   };
 }
 
+const LATITUDE = 44.6239;
+const LONGITUDE = -63.9205;
+
 const WeatherWidget = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
-
-  // Coordinates for French Village, Nova Scotia
-  const LATITUDE = 44.6239;
-  const LONGITUDE = -63.9205;
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -41,11 +40,11 @@ const WeatherWidget = () => {
         const response = await fetch(
           `https://api.open-meteo.com/v1/forecast?latitude=${LATITUDE}&longitude=${LONGITUDE}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,surface_pressure,apparent_temperature&timezone=America%2FHalifax`
         );
-        
+
         if (!response.ok) {
           throw new Error('Weather data not available');
         }
-        
+
         const data = await response.json();
         setWeather(data);
       } catch (err) {
@@ -60,7 +59,7 @@ const WeatherWidget = () => {
   }, []);
 
   const getWeatherDescription = (code: number): string => {
-    const weatherCodes: {[key: number]: string} = {
+    const weatherCodes: { [key: number]: string } = {
       0: 'Clear sky',
       1: 'Mainly clear',
       2: 'Partly cloudy',
@@ -123,7 +122,7 @@ const WeatherWidget = () => {
 
   return (
     <div className="relative">
-      <div 
+      <div
         className="flex items-center space-x-2 px-3 cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -133,10 +132,10 @@ const WeatherWidget = () => {
           <span className="ml-1 font-medium">{Math.round(weather.current.temperature_2m)}°C</span>
         </div>
       </div>
-      
+
       {/* Weather Details Popup */}
       {isHovered && (
-        <div 
+        <div
           className="absolute z-50 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
@@ -148,7 +147,7 @@ const WeatherWidget = () => {
                 {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 {getWeatherIcon(weather.current.weather_code, 'w-10 h-10')}
@@ -165,7 +164,7 @@ const WeatherWidget = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-2 text-sm">
                 <Droplets className="w-4 h-4 text-blue-500" />

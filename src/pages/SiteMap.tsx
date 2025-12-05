@@ -61,6 +61,7 @@ import type { MapArea, MapConfig } from "@/types/map";
 import './SiteMap.css';
 
 // Fix for default marker icons
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -119,7 +120,7 @@ const typedMapConfig: MapConfig = {
 // Component to handle map settings
 const MapSettings = () => {
   const map = useMap();
-  
+
   useEffect(() => {
     // Disable all interactions
     map.dragging.disable();
@@ -129,7 +130,7 @@ const MapSettings = () => {
     map.keyboard.disable();
     map.scrollWheelZoom.disable();
     if (map.tap) map.tap.disable();
-    
+
     // Set view to center
     map.setView([typedMapConfig.center.lat, typedMapConfig.center.lng], typedMapConfig.zoom);
   }, [map]);
@@ -140,7 +141,7 @@ const MapSettings = () => {
 const SiteMap = () => {
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  
+
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -287,11 +288,11 @@ const SiteMap = () => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
-                  
+
                   {/* Site Border */}
                   <Polygon
                     positions={typedMapConfig.areas.siteBorder}
-                    pathOptions={{ 
+                    pathOptions={{
                       color: '#000000',
                       weight: 2,
                       opacity: 1,
@@ -301,18 +302,18 @@ const SiteMap = () => {
                   >
                     <Tooltip sticky>Conservation Area Boundary</Tooltip>
                   </Polygon>
-                  
+
                   {/* Render Areas */}
                   {renderArea(typedMapConfig.areas.rewildingArea, '#4CAF50')}
                   {renderArea(typedMapConfig.areas.yellowBirchArea, '#FFC107')}
                   {renderArea(typedMapConfig.areas.wetlandArea, '#2196F3')}
-                  
+
                   {/* Render Trail */}
                   {renderTrail(typedMapConfig.areas.trailPath)}
-                  
+
                   {/* POI Markers with selection support */}
                   {typedMapConfig.pois.map((poi) => (
-                    <Marker 
+                    <Marker
                       key={poi.id}
                       position={poi.position}
                       eventHandlers={{
@@ -330,8 +331,8 @@ const SiteMap = () => {
                           <h3 className="font-bold">{poi.name}</h3>
                           <p className="text-sm">{poi.description}</p>
                           {poi.audioSrc && (
-                            <AudioButton 
-                              text={poi.audioText || poi.description} 
+                            <AudioButton
+                              text={poi.audioText || poi.description}
                               className="mt-2"
                             />
                           )}
@@ -342,7 +343,7 @@ const SiteMap = () => {
 
                   {/* User Location Marker */}
                   {userLocation && (
-                    <Marker 
+                    <Marker
                       position={[userLocation.lat, userLocation.lng]}
                       icon={L.divIcon({
                         className: 'user-location-marker',
@@ -385,7 +386,7 @@ const SiteMap = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         {poi.audioSrc && (
-                          <AudioButton 
+                          <AudioButton
                             text={poi.audioText || poi.description}
                             variant="outline"
                             className="p-2 h-auto"
@@ -416,8 +417,8 @@ const SiteMap = () => {
               <h2 className="text-2xl font-bold mb-6 flex items-center">
                 How to Use This
                 <div className="ml-4">
-                  <AudioButton 
-                    text="How to Use This Map. Click on any colored marker to learn more about that feature. Use the GPS button to find your current location. The map shows all major trails, historical sites, and conservation areas within our property boundaries." 
+                  <AudioButton
+                    text="How to Use This Map. Click on any colored marker to learn more about that feature. Use the GPS button to find your current location. The map shows all major trails, historical sites, and conservation areas within our property boundaries."
                     variant="ghost"
                     className="p-2 h-auto bg-white/20 hover:bg-white/30"
                   />
@@ -445,17 +446,17 @@ const SiteMap = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Visit Us Button */}
           <div className="mt-8 text-center">
-            <a 
+            <a
               href="https://maps.app.goo.gl/hLf36RZKihctRw2f9"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="inline-block"
             >
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 className="gap-2 bg-primary text-white hover:bg-primary/90 transition-colors"
               >
                 <MapPin className="w-5 h-5" />

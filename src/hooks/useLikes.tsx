@@ -6,7 +6,7 @@ import { toast } from '@/components/ui/use-toast';
 // Generate a session ID for anonymous users
 const getSessionId = () => {
   if (typeof window === 'undefined') return '';
-  
+
   let sessionId = localStorage.getItem('anonymous_session_id');
   if (!sessionId) {
     sessionId = 'anon_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
@@ -27,26 +27,26 @@ export const useLikes = (photoId: string): UseLikesResult => {
   const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  
+
   const fetchLikes = useCallback(async () => {
     if (!photoId) {
       setLoading(false);
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Get total likes count for this specific photo
       const { count, error: countError } = await supabase
         .from('photo_likes')
         .select('*', { count: 'exact', head: true })
         .eq('photo_id', photoId);
-      
+
       if (countError) throw countError;
-      
+
       setLikes(count || 0);
-      
+
       // Check if current user/session has liked this photo
       if (user) {
         const { data, error: likeError } = await supabase
@@ -55,7 +55,7 @@ export const useLikes = (photoId: string): UseLikesResult => {
           .eq('photo_id', photoId)
           .eq('user_id', user.id)
           .maybeSingle();
-          
+
         if (likeError) throw likeError;
         setIsLiked(!!data);
       } else {
@@ -67,7 +67,7 @@ export const useLikes = (photoId: string): UseLikesResult => {
             .eq('photo_id', photoId)
             .eq('session_id', sessionId)
             .maybeSingle();
-            
+
           if (sessionError) throw sessionError;
           setIsLiked(!!data);
         }
@@ -97,14 +97,14 @@ export const useLikes = (photoId: string): UseLikesResult => {
       console.warn('Cannot toggle like: No photo ID provided or operation in progress');
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       if (isLiked) {
         // Remove like
-        const deleteConditions: any = { photo_id: photoId };
-        
+        const deleteConditions: Record<string, string> = { photo_id: photoId };
+
         if (user) {
           deleteConditions.user_id = user.id;
         } else {
@@ -117,23 +117,23 @@ export const useLikes = (photoId: string): UseLikesResult => {
           .from('photo_likes')
           .delete()
           .match(deleteConditions);
-          
+
         if (error) throw error;
-        
+
         setLikes(prev => Math.max(0, prev - 1));
         setIsLiked(false);
       } else {
         // Add like
-        const likeData = user 
+        const likeData = user
           ? { photo_id: photoId, user_id: user.id }
           : { photo_id: photoId, session_id: getSessionId() };
 
         const { error } = await supabase
           .from('photo_likes')
           .insert(likeData);
-        
+
         if (error) throw error;
-        
+
         setLikes(prev => prev + 1);
         setIsLiked(true);
       }

@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, useCallback } from 'react';
+import { useState, useEffect, createContext, useContext, useCallback, useRef } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -29,13 +29,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle token refresh
   const setupTokenRefresh = useCallback((session: Session | null) => {
     // Clear any existing interval
-    if (refreshInterval) {
-      clearInterval(refreshInterval);
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+      refreshIntervalRef.current = null;
     }
 
     // Only set up refresh if we have a valid session
@@ -52,10 +53,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }, TOKEN_REFRESH_INTERVAL);
 
-      setRefreshInterval(interval);
-      return () => clearInterval(interval);
+      refreshIntervalRef.current = interval;
     }
-  }, [refreshInterval]);
+  }, []);
 
   // Handle auth state changes
   useEffect(() => {
@@ -65,14 +65,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
+
         // Set up token refresh when session changes
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setupTokenRefresh(session);
         } else if (event === 'SIGNED_OUT') {
-          if (refreshInterval) {
-            clearInterval(refreshInterval);
-            setRefreshInterval(null);
+          if (refreshIntervalRef.current) {
+            clearInterval(refreshIntervalRef.current);
+            refreshIntervalRef.current = null;
           }
         }
       }
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        
+
         if (currentSession) {
           setupTokenRefresh(currentSession);
         }
@@ -100,8 +100,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       subscription.unsubscribe();
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
       }
     };
   }, [setupTokenRefresh]);
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setError(null);
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (error) throw error;
-      
+
       // After successful signup, we'll update the user's profile in a separate table
       if (userData) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -146,7 +146,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       }
-      
+
       return { error: null };
     } catch (err) {
       const authError = err as AuthError;
@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setError(null);
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) throw error;
       return { error: null };
     } catch (err) {
@@ -193,9 +193,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       setError(null);
       const { data, error } = await supabase.auth.refreshSession();
-      
+
       if (error) throw error;
-      
+
       setSession(data.session);
       setUser(data.user);
       return { error: null };

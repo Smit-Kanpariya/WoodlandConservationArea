@@ -68,7 +68,7 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
         });
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
@@ -78,21 +78,21 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
         });
         return;
       }
-      
+
       setSelectedFile(file);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile || !user) return;
-    
+
     setIsUploading(true);
-    
+
     try {
       // Generate unique filename
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      
+
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('photos')
@@ -127,10 +127,11 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
       setIsOpen(false);
       onUploadSuccess?.();
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload photo.";
       toast({
         title: "Upload Failed",
-        description: error.message || "Failed to upload photo.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -147,7 +148,7 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
             Upload Photo
           </Button>
         </DialogTrigger>
-        
+
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Upload Photo</DialogTitle>
@@ -207,8 +208,8 @@ const PhotoUpload = ({ onUploadSuccess }: PhotoUploadProps) => {
         </DialogContent>
       </Dialog>
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
         onClose={handleAuthModalClose}
         onSuccess={handleAuthSuccess}
       />

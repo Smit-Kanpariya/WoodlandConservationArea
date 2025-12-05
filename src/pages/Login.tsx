@@ -22,7 +22,7 @@ const Login = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const handleForgotPassword = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!email) {
@@ -33,7 +33,7 @@ const Login = () => {
       });
       return;
     }
-    
+
     try {
       setLoading(true);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -41,7 +41,7 @@ const Login = () => {
       });
 
       if (error) throw error;
-      
+
       setResetSent(true);
       setResetEmail(email);
       toast({
@@ -63,7 +63,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       if (isLogin) {
         const { error } = await signIn(email, password);
@@ -90,10 +90,11 @@ const Login = () => {
         setPassword('');
         setIsLogin(true); // Switch to login form after signup
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
       toast({
         title: 'Error',
-        description: error.message || 'An error occurred',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -181,11 +182,11 @@ const Login = () => {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
-            
+
             {isLogin && (
               <div className="text-center mt-2">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={handleForgotPassword}
                   disabled={loading || !email}
                   className={`text-sm ${!email ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:underline'}`}
