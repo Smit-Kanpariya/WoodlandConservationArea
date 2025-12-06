@@ -53,7 +53,19 @@ This command downloads and installs all the required libraries listed in `packag
 ```bash
 npm install
 ```
-*Note: This might take a few minutes depending on your internet connection.*
+### 4. Configure Environment Variables
+The application needs to connect to the Supabase backend. You need to create a configuration file for this.
+
+1.  In the root folder (`WoodlandConservationArea/`), create a new file named `.env`.
+2.  Copy and paste the following code into the `.env` file:
+
+```env
+VITE_SUPABASE_PROJECT_ID=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SUPABASE_URL=
+```
+
+*Note: You will need to fill in these values with your specific project details if you are connecting to your own Supabase instance. Ask your team lead for these keys if you don't have them.*
 
 ---
 
@@ -164,12 +176,7 @@ This project relies on the following major technologies. You don't need to insta
 *   Check if the Leaflet CSS is imported in `index.html` or `main.tsx`.
 
 **Login not working:**
-*   The project is set up for Supabase Auth. You need to provide valid Supabase credentials in a `.env` file if you want to connect to a real backend.
-*   Example `.env` file:
-    ```
-    VITE_SUPABASE_URL=your_supabase_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
+*   The project is set up for Supabase Auth. Ensure you have created the `.env` file as described in the "Configure Environment Variables" section above.
 
 ---
 
