@@ -53,7 +53,48 @@ This command downloads and installs all the required libraries listed in `packag
 ```bash
 npm install
 ```
-*Note: This might take a few minutes depending on your internet connection.*
+### 4. Configure Environment Variables
+The application needs to connect to the Supabase backend. You need to create a configuration file for this.
+
+1.  In the root folder (`WoodlandConservationArea/`), create a new file named `.env`.
+2.  Copy and paste the following code into the `.env` file:
+
+```env
+VITE_SUPABASE_PROJECT_ID=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SUPABASE_URL=
+```
+
+*Note: You will need to fill in these values with your specific project details if you are connecting to your own Supabase instance. Ask your team lead for these keys if you don't have them.*
+
+### 5. Setting up the Contact Form (Email Service)
+The "Contact Us" page is set up to send emails using a free service called **EmailJS**. This allows the form to work instantly without needing complex server code.
+
+**How it works right now:**
+Currently, it is configured with a test account using these details:
+*   **Service ID:** `service_4x4duj4`
+*   **Template ID:** `template_owew8nx`
+*   **Public Key:** `Z5R7CrPNBLeaMJKeP`
+
+**How to make emails send to YOU:**
+If you want to receive the contact form submissions in your own inbox, follow these simple steps:
+
+1.  **Sign up:** Go to [EmailJS.com](https://www.emailjs.com/) and create a free account.
+2.  **Add a Service:**
+    *   Click "Email Services" -> "Add New Service".
+    *   Choose "Gmail" (or your preferred provider) and connect your account.
+    *   Copy your new **Service ID** (it looks like `service_xxxxx`).
+3.  **Create a Template:**
+    *   Click "Email Templates" -> "Create New Template".
+    *   Design the email subjects/body. Use `{{name}}`, `{{email}}`, and `{{message}}` to show the user's input.
+    *   Copy your **Template ID** (it looks like `template_xxxxx`).
+4.  **Get your Public Key:**
+    *   Click on your name/avatar in the top right -> "Account".
+    *   Copy the **Public Key** (it looks like a random string of letters/numbers).
+5.  **Update the Code:**
+    *   Open the file: `src/pages/Contact.tsx`.
+    *   Scroll down to around line 85 (inside the `handleSubmit` function).
+    *   Replace the existing IDs with your new ones.
 
 ---
 
@@ -164,12 +205,7 @@ This project relies on the following major technologies. You don't need to insta
 *   Check if the Leaflet CSS is imported in `index.html` or `main.tsx`.
 
 **Login not working:**
-*   The project is set up for Supabase Auth. You need to provide valid Supabase credentials in a `.env` file if you want to connect to a real backend.
-*   Example `.env` file:
-    ```
-    VITE_SUPABASE_URL=your_supabase_url
-    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-    ```
+*   The project is set up for Supabase Auth. Ensure you have created the `.env` file as described in the "Configure Environment Variables" section above.
 
 ---
 
