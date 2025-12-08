@@ -13,6 +13,7 @@ You are tasked with continuing the development of this application. The core inf
 - **Frontend:** Complete React + Vite setup with TypeScript.
 - **Styling:** Tailwind CSS with shadcn/ui components for a premium look.
 - **Maps:** Interactive maps using Leaflet.
+- **Audio:** Enhanced Text-to-Speech using online natural voices with fallback.
 - **Testing:** Comprehensive End-to-End (E2E) testing setup with Cypress.
 - **Backend Integration:** Supabase client is configured (requires your own Supabase project credentials if you plan to use it).
 
