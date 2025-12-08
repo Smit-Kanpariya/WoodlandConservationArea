@@ -25,4 +25,13 @@ export default defineConfig({
       return config;
     },
   },
+
+  component: {
+    devServer: {
+      framework: "react",
+      bundler: "vite",
+    },
+    indexHtmlFile: "cypress/support/component-index.html",
+    supportFile: "cypress/support/component.tsx",
+  },
 });

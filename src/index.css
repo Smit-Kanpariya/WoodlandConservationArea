@@ -112,73 +112,73 @@
 }
 
 body {
-    @apply bg-background text-foreground;
-    font-family:
-      "Calibri",
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      sans-serif;
-    font-size: var(--large-text);
-    line-height: 1.6;
-  }
+  @apply bg-background text-foreground;
+  font-family:
+    "Calibri",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: var(--large-text);
+  line-height: 1.6;
+}
 
-  /* Accessibility enhancements */
-  .text-speech-button {
-    @apply bg-accent text-accent-foreground hover:bg-accent/90 px-4 py-2 rounded-md font-medium transition-colors;
-  }
+/* Accessibility enhancements */
+.text-speech-button {
+  @apply bg-accent text-accent-foreground hover:bg-accent/90 px-4 py-2 rounded-md font-medium transition-colors;
+}
 
-  .audio-description-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 p-2 rounded-full transition-colors;
-  }
+.audio-description-button {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 p-2 rounded-full transition-colors;
+}
 
-  /* Prevent word breaking as specified */
-  .no-break {
-    word-break: keep-all;
-    hyphens: none;
-  }
+/* Prevent word breaking as specified */
+.no-break {
+  word-break: keep-all;
+  hyphens: none;
+}
 
 
-  /* Hero section styling */
-  .hero-overlay {
-    background: linear-gradient(
-      135deg,
+/* Hero section styling */
+.hero-overlay {
+  background: linear-gradient(135deg,
       hsl(var(--primary) / 0.8),
-      hsl(var(--accent) / 0.6)
-    );
+      hsl(var(--accent) / 0.6));
+}
+
+/* Statistics section */
+.stats-card {
+  @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-6 text-center hover:bg-card/90 transition-all;
+}
+
+/* Event cards */
+.event-card {
+  @apply bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
+}
+
+/* Animation utilities */
+.story-link {
+  @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
+}
+
+.hover-scale {
+  @apply transition-transform duration-200 hover:scale-105;
+}
+
+/* Typing animation styles */
+.typing-cursor {
+  animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  50% {
+    opacity: 1;
   }
 
-  /* Statistics section */
-  .stats-card {
-    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-6 text-center hover:bg-card/90 transition-all;
+  51%,
+  100% {
+    opacity: 0;
   }
-
-  /* Event cards */
-  .event-card {
-    @apply bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1;
-  }
-
-  /* Animation utilities */
-  .story-link {
-    @apply relative inline-block after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-primary after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left;
-  }
-
-  .hover-scale {
-    @apply transition-transform duration-200 hover:scale-105;
-  }
-
-  /* Typing animation styles */
-  .typing-cursor {
-    animation: blink 1.2s infinite;
-  }
-
-  @keyframes blink {
-    0%,
-    50% {
-      opacity: 1;
-    }
-    51%,
-    100% {
-      opacity: 0;
-    }
-  }
+}
