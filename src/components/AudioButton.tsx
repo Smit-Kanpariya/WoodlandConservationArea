@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 
 // Global reference to handle stopping previous audio to prevent overlap
 let currentAudio: HTMLAudioElement | null = null;
+let currentText: string | null = null;
 
 interface AudioButtonProps {
   text: string;
@@ -19,6 +20,12 @@ const AudioButton: React.FC<AudioButtonProps> = ({
   size = "sm",
 }) => {
   const playAudio = () => {
+    // Check if THIS specific audio is currently playing
+    const isPlayingThis = currentText === text && (
+      (currentAudio && !currentAudio.paused) ||
+      ("speechSynthesis" in window && window.speechSynthesis.speaking)
+    );
+
     // 1. Stop any system speech
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
@@ -30,25 +37,41 @@ const AudioButton: React.FC<AudioButtonProps> = ({
       currentAudio = null;
     }
 
+    // Reset current text
+    currentText = null;
+
+    // If we were playing this audio, we just stopped it. Do not restart.
+    if (isPlayingThis) {
+      return;
+    }
+
     // 3. Try to play using Google TTS (Online "Soft Female Voice")
     // This provides a much more natural, softer female voice than most default system voices.
     const encodedText = encodeURIComponent(text);
     const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodedText}`;
 
     const audio = new Audio(url);
+    currentAudio = audio;
+    currentText = text;
 
     audio.play()
       .then(() => {
-        currentAudio = audio;
         // Clear reference when audio finishes
         audio.onended = () => {
           if (currentAudio === audio) {
             currentAudio = null;
+            currentText = null;
           }
         };
       })
       .catch((e) => {
         console.warn("Online audio failed, falling back to system TTS", e);
+
+        // If the online audio failed, clear the currentAudio reference
+        if (currentAudio === audio) {
+          currentAudio = null;
+        }
+
         // Fallback to system TTS if offline or blocked
         if ("speechSynthesis" in window) {
           const synth = window.speechSynthesis;
@@ -71,7 +94,18 @@ const AudioButton: React.FC<AudioButtonProps> = ({
           utterance.pitch = 0.9;
           utterance.volume = 1;
 
+          utterance.onend = () => {
+            if (currentText === text) {
+              currentText = null;
+            }
+          };
+
+          // We are about to speak, so ensure currentText is set (it might have been cleared if we thought audio failed)
+          currentText = text;
           synth.speak(utterance);
+        } else {
+          // No fallback available
+          currentText = null;
         }
       });
   };
